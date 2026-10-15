@@ -917,3 +917,92 @@ body {
   gap: 12px;
   margin-top: 12px;
 }
+/* --- RESPONSIVIDADE PARA TELEMÓVEIS E TABLETS --- */
+
+@media screen and (max-width: 768px) {
+  /* Container geral ganha margens menores em mobile */
+  .detalhes-container, 
+  .form-container, 
+  .lista-container {
+    padding: 12px 8px;
+    max-width: 100%;
+  }
+
+  /* Cabeçalho da página de detalhes empilha em coluna */
+  .detalhes-header-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .detalhes-acoes-topo {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .btn-acao-moderno, 
+  .btn-voltar-slim {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  /* Caixa principal de detalhes */
+  .detalhes-card-box {
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .detalhes-titulo {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  /* Reduz altura do carrossel em telemóveis para não ocupar a tela toda */
+  .detalhes-carousel {
+    height: 260px;
+    margin-bottom: 16px;
+  }
+
+  /* Transforma a grid de informações em coluna única */
+  .detalhes-info-grid, 
+  .form-edicao-moderno, 
+  .coord-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .info-item.full-width,
+  .form-edicao-moderno .form-group.full-width,
+  .coord-grid {
+    grid-column: span 1 !important;
+  }
+
+  /* Ajustes de formulários e inputs em mobile */
+  .form-edicao-moderno input,
+  .form-edicao-moderno textarea {
+    font-size: 16px; /* Evita zoom automático indesejado no iOS/Android */
+    padding: 12px;
+  }
+
+  .form-botoes-acao {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-botoes-acao button {
+    width: 100%;
+  }
+
+  /* Barra de navegação superior (Header do app) */
+  header, .navbar, .topo-app {
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+    text-align: center;
+  }
+}
