@@ -45,7 +45,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // Cria previews locais para exibição imediata
     const previews = files.map(file => URL.createObjectURL(file));
     setArquivosNovos(prev => [...prev, ...files]);
     setNovasImagensPreviews(prev => [...prev, ...previews]);
@@ -68,7 +67,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
     e.preventDefault();
 
     try {
-      // Monta o FormData para enviar texto e arquivos via Multipart/form-data para a API do Render
       const dataForm = new FormData();
       dataForm.append('nome', formData.nome || '');
       dataForm.append('descricao', formData.descricao || '');
@@ -82,27 +80,21 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
         dataForm.append('longitude', formData.longitude);
       }
 
-      // Envia as URLs das imagens que já existiam e foram mantidas
       if (Array.isArray(formData.imagens)) {
         formData.imagens.forEach(url => {
           dataForm.append('imagensExistentes', url);
         });
       }
 
-      // Adiciona os novos arquivos binários para o backend fazer o upload seguro
       arquivosNovos.forEach(file => {
         dataForm.append('imagens', file);
       });
 
-      console.log('📦 Enviando atualização via API...');
-
-      // Como a api.js padrão usa JSON, vamos usar fetch com o token do localStorage para suportar FormData
       const token = localStorage.getItem('admin_token');
       const response = await fetch(`${import.meta.env.PROD ? 'https://turismo-api-vv62.onrender.com/api' : 'http://localhost:3000/api'}/${tipo}/${item.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
-          // Não definir Content-Type ao usar FormData, o browser faz isso automaticamente com o boundary
         },
         body: dataForm
       });
@@ -121,7 +113,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
 
     } catch (error) {
       alert('❌ Erro ao atualizar: ' + error.message);
-      console.error('Erro na API:', error);
     }
   };
 
@@ -142,12 +133,12 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
     <div className="detalhes-container">
       <div className="detalhes-header-nav">
         <button className="btn-voltar-slim" onClick={onVoltar}>
-          ← Voltar para Lista
+          ← Voltar
         </button>
         {!editando && (
           <div className="detalhes-acoes-topo">
             <button className="btn-acao-moderno btn-editar" onClick={() => setEditando(true)}>
-              ✏️ Editar Item
+              ✏️ Editar
             </button>
             <button className="btn-acao-moderno btn-excluir" onClick={handleDelete}>
               🗑️ Excluir
@@ -334,7 +325,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
 
             <div className="form-botoes-acao">
               <button type="submit" className="btn-acao-moderno btn-salvar">
-                💾 Salvar Alterações
+                💾 Salvar
               </button>
               <button
                 type="button"

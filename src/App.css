@@ -689,6 +689,98 @@ body {
 }
 .form-botoes-acao { grid-column: span 2; display: flex; gap: 12px; margin-top: 12px; }
 
+/* ✅ Botões de Ação do DetalhesCard uniformes e com hover preto */
+.btn-voltar-slim,
+.btn-acao-moderno {
+  background: transparent;
+  color: #111111;
+  border: 1px solid #111111;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.btn-voltar-slim:hover,
+.btn-acao-moderno:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+/* Ajustes finos para o carrossel e indicadores */
+.detalhes-carousel {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f4f4f4;
+  margin-bottom: 24px;
+}
+
+.detalhes-imagem-principal {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  color: #111111;
+  border: none;
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background 0.2s;
+}
+
+.carousel-btn:hover {
+  background: #ffffff;
+}
+
+.carousel-btn.prev { left: 12px; }
+.carousel-btn.next { right: 12px; }
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.indicator-dot.active {
+  background: #ffffff;
+  width: 20px;
+  border-radius: 4px;
+}
 
 /* ========================================================== */
 /* ✅ RESPONSIVIDADE PERFEITA: E-MAIL E SAIR NA MESMA LINHA   */
@@ -798,5 +890,51 @@ body {
 
   .detalhes-carousel {
     height: 240px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* Força todos os grids e o formulário de edição a ficarem em coluna única (1fr) no telemóvel */
+  .form-edicao-moderno,
+  .detalhes-info-grid, 
+  .coord-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  /* Garante que cada grupo de input ocupe 100% da largura útil */
+  .form-edicao-moderno .form-group,
+  .form-group,
+  .coord-grid > div {
+    width: 100% !important;
+    grid-column: span 1 !important;
+  }
+
+  /* Inputs e textareas com tamanho confortável e sem corte */
+  .form-edicao-moderno input,
+  .form-edicao-moderno textarea,
+  .form-group input,
+  .form-group textarea {
+    width: 100% !important;
+    font-size: 16px !important; /* Evita zoom automático no iOS e melhora a leitura */
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Botões de ação do formulário (Salvar / Cancelar) empilhados ou lado a lado confortáveis */
+  .form-botoes-acao {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 16px !important;
+  }
+
+  .form-botoes-acao button {
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 12px !important;
   }
 }
