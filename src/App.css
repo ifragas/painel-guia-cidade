@@ -1005,4 +1005,72 @@ body {
     gap: 10px;
     text-align: center;
   }
+}/* --- CORREÇÃO DE RESPONSIVIDADE DO HEADER E FOOTER EM MOBILE --- */
+
+@media screen and (max-width: 768px) {
+  /* Torna o header / barra de navegação principal totalmente fluído */
+  header, 
+  .navbar, 
+  .topo-app,
+  .app-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px !important;
+    gap: 10px !important;
+    height: auto !important;
+  }
+
+  /* Garanta que o título/logo e os botões de navegação fiquem centralizados ou em bloco */
+  header > div, 
+  .navbar > div, 
+  .topo-app > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  /* Ajusta botões do menu superior para preencherem bem o espaço sem transbordar */
+  header button, 
+  .navbar button, 
+  .topo-app button,
+  header a,
+  .navbar a {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  /* Informações de utilizador (ex: e-mail e botão Sair) alinhadas */
+  .user-info, 
+  .auth-nav,
+  .acoes-usuario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  /* Footer responsivo */
+  footer, 
+  .app-footer {
+    text-align: center;
+    padding: 12px;
+    font-size: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    word-break: break-word;
+  }
+
+  /* Evita qualquer overflow horizontal na página */
+  body, html, #root {
+    overflow-x: hidden;
+    width: 100%;
+  }
 }
