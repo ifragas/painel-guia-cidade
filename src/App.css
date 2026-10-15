@@ -10,6 +10,7 @@ body {
   background-color: #fafafa;
   color: #111111;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 .App {
@@ -21,7 +22,7 @@ body {
   position: relative;
 }
 
-/* ✅ Header Fino (Slim) em Linha Única (Largura Total) */
+/* ✅ Header Fino (Slim) - Desktop */
 .header {
   background: #ffffff;
   color: #111111;
@@ -49,7 +50,7 @@ body {
   white-space: nowrap;
 }
 
-/* ✅ Navegação em abas incorporada diretamente na linha do Header */
+/* ✅ Navegação em abas */
 .nav-abas {
   display: flex;
   background: transparent;
@@ -110,6 +111,7 @@ body {
   font-weight: 500;
   font-size: 0.8rem;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-logout:hover {
@@ -117,7 +119,7 @@ body {
   color: #ffffff;
 }
 
-/* ✅ Conteúdo principal com centralização elegante */
+/* ✅ Conteúdo principal */
 .main {
   flex: 1;
   padding: 3rem 2rem;
@@ -145,7 +147,7 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
 }
 
-/* ✅ Formulários e Inputs Minimalistas */
+/* ✅ Formulários e Inputs */
 .form-container h2, .form-edicao h2, .lista-container h2 {
   margin-bottom: 1.75rem;
   color: #111111;
@@ -277,7 +279,7 @@ body {
   background: #e2e2e2;
 }
 
-/* ✅ Footer Fino e Fixo (Largura Total) */
+/* ✅ Footer */
 .footer {
   text-align: center;
   padding: 0.85rem;
@@ -293,7 +295,7 @@ body {
   width: 100%;
 }
 
-/* ✅ Login minimalista */
+/* ✅ Login */
 .login-container {
   display: flex;
   justify-content: center;
@@ -336,7 +338,7 @@ body {
   font-size: 0.85rem;
 }
 
-/* ✅ Selector de tipo centralizado */
+/* ✅ Seletor de tipo */
 .tipo-selector, .tipo-seletor {
   width: 100%;
   max-width: 1000px;
@@ -367,7 +369,7 @@ body {
   color: #111111;
 }
 
-/* Grille de cards alinhada */
+/* Cards */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -496,13 +498,8 @@ body {
   background: #ffffff;
 }
 
-.carousel-btn.esquerda {
-  left: 16px;
-}
-
-.carousel-btn.direita {
-  right: 16px;
-}
+.carousel-btn.esquerda { left: 16px; }
+.carousel-btn.direita { right: 16px; }
 
 .carousel-indicadores {
   position: absolute;
@@ -545,7 +542,7 @@ body {
   color: #111111;
 }
 
-/* Galeria de miniaturas na edição */
+/* Galeria de miniaturas */
 .galeria-miniaturas {
   display: flex;
   flex-wrap: wrap;
@@ -584,22 +581,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background 0.2s;
 }
 
-.btn-remover-miniatura:hover {
-  background: #000000;
-}
-
-/* --- ESTILOS MODERNOS PARA A PÁGINA DE DETALHES --- */
-
-.detalhes-container {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px 16px;
-}
-
+/* Botões modernos de ação */
 .detalhes-header-nav {
   display: flex;
   justify-content: space-between;
@@ -615,12 +599,6 @@ body {
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-voltar-slim:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
 }
 
 .detalhes-acoes-topo {
@@ -638,52 +616,12 @@ body {
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.2s;
 }
 
-.btn-acao-moderno:active {
-  transform: scale(0.97);
-}
-
-.btn-editar {
-  background-color: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-}
-
-.btn-editar:hover {
-  background-color: #dbeafe;
-}
-
-.btn-excluir {
-  background-color: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-}
-
-.btn-excluir:hover {
-  background-color: #fee2e2;
-}
-
-.btn-salvar {
-  background-color: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
-
-.btn-salvar:hover {
-  background-color: #d1fae5;
-}
-
-.btn-cancelar {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-}
-
-.btn-cancelar:hover {
-  background-color: #e5e7eb;
-}
+.btn-editar { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.btn-excluir { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.btn-salvar { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.btn-cancelar-edicao { background-color: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
 
 .detalhes-card-box {
   background: #ffffff;
@@ -716,55 +654,6 @@ body {
   object-fit: cover;
 }
 
-.carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  font-size: 24px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.carousel-btn:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-.carousel-btn.prev { left: 16px; }
-.carousel-btn.next { right: 16px; }
-
-.carousel-indicators {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-}
-
-.indicator-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: background 0.2s, width 0.2s;
-}
-
-.indicator-dot.active {
-  background: #ffffff;
-  width: 24px;
-  border-radius: 4px;
-}
-
 .detalhes-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -781,358 +670,109 @@ body {
   border: 1px solid #f3f4f6;
 }
 
-.info-item.full-width {
-  grid-column: span 2;
-}
+.info-item.full-width { grid-column: span 2; }
+.info-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #6b7280; }
+.info-value { font-size: 15px; color: #1f2937; }
+.descricao-texto { line-height: 1.6; white-space: pre-line; }
 
-.info-label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6b7280;
-}
-
-.info-value {
-  font-size: 15px;
-  color: #1f2937;
-}
-
-.descricao-texto {
-  line-height: 1.6;
-  white-space: pre-line;
-}
-
-/* Formulário de Edição Moderno */
 .form-edicao-moderno {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
-.form-edicao-moderno .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.form-edicao-moderno .form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-edicao-moderno .form-group.full-width { grid-column: span 2; }
+.form-edicao-moderno label { font-size: 13px; font-weight: 600; color: #374151; }
+.form-edicao-moderno input, .form-edicao-moderno textarea {
+  padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff;
 }
+.form-botoes-acao { grid-column: span 2; display: flex; gap: 12px; margin-top: 12px; }
 
-.form-edicao-moderno .form-group.full-width {
-  grid-column: span 2;
-}
 
-.form-edicao-moderno label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.form-edicao-moderno input,
-.form-edicao-moderno textarea {
-  padding: 10px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  background: #fff;
-}
-
-.form-edicao-moderno input:focus,
-.form-edicao-moderno textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.coord-grid {
-  grid-column: span 2;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.galeria-miniaturas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-}
-
-.miniatura-container {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-}
-
-.miniatura-imagem {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.btn-remover-miniatura {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(239, 68, 68, 0.9);
-  color: white;
-  border: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  font-size: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.input-file-oculto {
-  display: none;
-}
-
-.btn-upload-personalizado {
-  display: inline-block;
-  padding: 10px 16px;
-  background: #f3f4f6;
-  border: 1px dashed #9ca3af;
-  border-radius: 8px;
-  color: #374151;
-  font-weight: 500;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.2s;
-}
-
-.btn-upload-personalizado:hover {
-  background: #e5e7eb;
-}
-
-.form-botoes-acao {
-  grid-column: span 2;
-  display: flex;
-  gap: 12px;
-  margin-top: 12px;
-}
-/* --- RESPONSIVIDADE PARA TELEMÓVEIS E TABLETS --- */
+/* ========================================================== */
+/* ✅ RESPONSIVIDADE PERFEITA PARA MOBILE (AJUSTE DO HEADER)  */
+/* ========================================================== */
 
 @media screen and (max-width: 768px) {
-  /* Container geral ganha margens menores em mobile */
-  .detalhes-container, 
-  .form-container, 
-  .lista-container {
-    padding: 12px 8px;
-    max-width: 100%;
+  .header {
+    padding: 10px 14px;
+    height: auto;
   }
 
-  /* Cabeçalho da página de detalhes empilha em coluna */
-  .detalhes-header-nav {
+  /* Organiza o header em 2 linhas limpas no telemóvel */
+  .header-top {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 10px;
   }
 
-  .detalhes-acoes-topo {
+  /* Linha 1: Título à esquerda e Utilizador (E-mail + Sair) à direita */
+  .header-top > div:first-child,
+  .header > h1 {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-  }
-
-  .btn-acao-moderno, 
-  .btn-voltar-slim {
-    flex: 1;
-    justify-content: center;
-    text-align: center;
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-
-  /* Caixa principal de detalhes */
-  .detalhes-card-box {
-    padding: 16px;
-    border-radius: 8px;
-  }
-
-  .detalhes-titulo {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  /* Reduz altura do carrossel em telemóveis para não ocupar a tela toda */
-  .detalhes-carousel {
-    height: 260px;
-    margin-bottom: 16px;
-  }
-
-  /* Transforma a grid de informações em coluna única */
-  .detalhes-info-grid, 
-  .form-edicao-moderno, 
-  .coord-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px;
-  }
-
-  .info-item.full-width,
-  .form-edicao-moderno .form-group.full-width,
-  .coord-grid {
-    grid-column: span 1 !important;
-  }
-
-  /* Ajustes de formulários e inputs em mobile */
-  .form-edicao-moderno input,
-  .form-edicao-moderno textarea {
-    font-size: 16px; /* Evita zoom automático indesejado no iOS/Android */
-    padding: 12px;
-  }
-
-  .form-botoes-acao {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .form-botoes-acao button {
+    align-items: center;
     width: 100%;
   }
 
-  /* Barra de navegação superior (Header do app) */
-  header, .navbar, .topo-app {
-    flex-direction: column;
-    padding: 10px;
-    gap: 10px;
-    text-align: center;
-  }
-}
-
-/* --- RESPONSIVIDADE OTIMIZADA PARA MOBILE (2 LINHAS NO HEADER) --- */
-
-@media screen and (max-width: 768px) {
-  body, html, #root {
-    overflow-x: hidden;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  /* 1. Header principal reorganizado em 2 linhas limpas */
-  header {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    padding: 10px 12px !important;
-    box-sizing: border-box;
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+  .user-info {
+    display: flex;
+    align-items: center;
     gap: 8px;
-  }
-
-  /* Título / Logo na primeira linha à esquerda */
-  header > h1, 
-  header > div:first-child {
-    font-size: 16px !important;
-    margin: 0 !important;
-  }
-
-  /* Bloco do utilizador (E-mail + Botão Sair) na primeira linha à direita */
-  header div:last-child,
-  .user-info, 
-  .auth-nav {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 6px !important;
     margin-left: auto;
   }
 
-  header div:last-child span {
+  .user-email {
     font-size: 11px;
-    max-width: 110px;
+    max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  header div:last-child button,
-  .btn-sair {
-    padding: 4px 8px !important;
-    font-size: 11px !important;
-    background-color: #fef2f2 !important;
-    color: #b91c1c !important;
-    border: 1px solid #fecaca !important;
-    border-radius: 6px;
-    cursor: pointer;
-    white-space: nowrap;
+  .btn-logout {
+    padding: 3px 6px;
+    font-size: 10px;
   }
 
-  /* 2. Barra de navegação secundária (Cadastrar / Listas) logo abaixo, ocupando a largura total */
-  .botoes-navegacao,
-  .nav-botoes-principal,
-  header .botoes-extras {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 10px !important;
-    width: 100% !important;
-    padding: 8px 0 !important;
-    background: #f9fafb;
-    border-top: 1px solid #f3f4f6;
-    margin-top: 4px;
-    box-sizing: border-box;
-  }
-
-  .botoes-navegacao button,
-  .nav-botoes-principal button {
-    padding: 6px 14px;
-    font-size: 13px;
-  }
-
-  /* Ajustes gerais de layout mobile para cards e formulários */
-  .detalhes-container, 
-  .form-container, 
-  .lista-container {
-    padding: 12px 10px;
-    max-width: 100%;
-  }
-
-  .detalhes-header-nav {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .detalhes-acoes-topo {
+  /* Linha 2: Botões de navegação (Cadastrar / Listas) organizados numa barra dedicada logo abaixo */
+  .nav-abas {
+    width: 100%;
     display: flex;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .btn-acao-moderno, 
-  .btn-voltar-slim {
-    flex: 1;
     justify-content: center;
+    border-top: 1px solid #eaeaea;
+    padding-top: 8px;
+    margin-top: 2px;
+  }
+
+  .abas-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .aba {
+    flex: 1;
     text-align: center;
-    padding: 10px 12px;
+    padding: 6px 10px;
     font-size: 13px;
+    background: #f4f4f4;
   }
 
-  .detalhes-card-box {
+  /* Ajustes gerais de espaçamento em mobile */
+  .main {
+    padding: 1.5rem 1rem;
+  }
+
+  .content-container, 
+  .form-container, 
+  .form-edicao, 
+  .lista-container, 
+  .detalhes-container {
     padding: 16px;
-    border-radius: 8px;
-  }
-
-  .detalhes-titulo {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .detalhes-carousel {
-    height: 260px;
-    margin-bottom: 16px;
+    max-width: 100%;
   }
 
   .detalhes-info-grid, 
@@ -1150,25 +790,10 @@ body {
 
   .form-edicao-moderno input,
   .form-edicao-moderno textarea {
-    font-size: 16px;
-    padding: 12px;
+    font-size: 16px; /* Evita zoom automático no iOS/Android */
   }
 
-  .form-botoes-acao {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .form-botoes-acao button {
-    width: 100%;
-  }
-
-  footer, 
-  .app-footer {
-    text-align: center;
-    padding: 12px;
-    font-size: 12px;
-    width: 100%;
-    box-sizing: border-box;
+  .detalhes-carousel {
+    height: 240px;
   }
 }
