@@ -1,19 +1,15 @@
-/* src/App.css */
+/* src/App.css - Design Minimalista e Centralizado */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  width: 100%;
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f7f9fc;
-  color: #333;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #fafafa;
+  color: #111111;
+  -webkit-font-smoothing: antialiased;
 }
 
 .App {
@@ -21,636 +17,450 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
-  background: #fff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  overflow: hidden;
+  background: #fafafa;
   position: relative;
 }
 
-/* ✅ Header fixo no topo */
+/* ✅ Header Fino (Slim) em Linha Única (Largura Total) */
 .header {
-  background: linear-gradient(135deg, #0066cc, #004080);
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  color: #111111;
+  padding: 0.85rem 3rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid #eaeaea;
+  width: 100%;
 }
 
 .header-top {
   display: flex;
-  justify-content: space-between; /* ✅ Separa título e usuário */
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  flex-wrap: nowrap;
+  width: 100%;
+  gap: 2rem;
 }
 
 .header h1 {
-  font-size: 1.5rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  margin: 0;
-  max-width: 70%;
+  letter-spacing: -0.01em;
+  color: #111111;
+  white-space: nowrap;
+}
+
+/* ✅ Navegação em abas incorporada diretamente na linha do Header */
+.nav-abas {
+  display: flex;
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+.abas-container {
+  display: flex;
+  gap: 8px;
+  width: auto;
+}
+
+.aba {
+  padding: 0.4rem 0.9rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #666666;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.aba:hover {
+  color: #111111;
+  background: #f4f4f4;
+}
+
+.aba.ativa {
+  color: #111111;
+  background: #f1f1f1;
+  border-color: #e2e2e2;
+  font-weight: 600;
+  box-shadow: none;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-left: auto; /* ✅ Empurra para a direita */
-  margin-right: 0;   /* ✅ Remove margem à direita */
-  flex-shrink: 500;
+  gap: 16px;
 }
 
 .user-email {
-  font-size: 14px;
-  color: white;
-  max-width: 150px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.85rem;
+  color: #666666;
 }
 
-
 .btn-logout {
-  background: #fff;
-  color: #0066cc;
-  border: none;
-  padding: 0.5rem 1rem;
+  background: transparent;
+  color: #111111;
+  border: 1px solid #111111;
+  padding: 0.35rem 0.8rem;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.3s;
-  flex-shrink: 0;
-  white-space: nowrap;
-  width: 50px;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
 }
 
 .btn-logout:hover {
-  background: #f0f0f0;
+  background: #111111;
+  color: #ffffff;
 }
 
-/* ✅ Menu de abas */
-.nav-abas {
-  display: flex;
-  
-  border-bottom: 1px solid #ddd;
-}
-
-.abas-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 0.5rem;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.aba {
-  flex: 1;
-  padding: 1rem;
-  background: none;
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: #666;
-  transition: all 0.3s;
-  border-radius: 6px;
-  width: 150px;
-  text-align: center;
-  background: #e0e0e0;
-}
-
-.aba:hover {
-  background: #e0e0e0;
-}
-
-.aba.ativa {
-  background: #0066cc;
-  color: white;
-}
-
-/* ✅ Conteúdo principal */
+/* ✅ Conteúdo principal com centralização elegante */
 .main {
   flex: 1;
-  padding: 2rem;
-  /*display: flex;*/
-  justify-content: center;
-  align-items: center;
-  background: #f7f9fc;
+  padding: 3rem 2rem;
+  background: #fafafa;
   overflow-y: auto;
-
-  margin-bottom: 60px;
-}
-
-.content-container {
+  padding-bottom: 90px;
   width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.form-container {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.form-container h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
-  text-align: center;
-  font-size: 1.8rem;
-}
-
-.form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+}
+
+.content-container, 
+.form-container, 
+.form-edicao, 
+.lista-container, 
+.detalhes-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 2.5rem 3rem;
+  border-radius: 12px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+}
+
+/* ✅ Formulários e Inputs Minimalistas */
+.form-container h2, .form-edicao h2, .lista-container h2 {
+  margin-bottom: 1.75rem;
+  color: #111111;
+  text-align: left;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 0.85rem;
+}
+
+.form, .form-edicao {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  width: 100%;
 }
 
-.form-group label {
-  font-weight: 600;
-  color: #444;
+.form-group label, .form-edicao .form-group label {
+  font-weight: 500;
+  color: #333333;
+  font-size: 0.85rem;
 }
 
 .form-group input,
 .form-group textarea,
-.form-group select {
+.form-group select,
+.form-edicao .form-group input,
+.form-edicao .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border 0.3s;
+  padding: 0.75rem 0.9rem;
+  background-color: #ffffff;
+  border: 1px solid #d1d1d1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #111111;
+  transition: border-color 0.2s ease;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
-  border-color: #0066cc;
+.form-group textarea:focus,
+.form-group select:focus,
+.form-edicao .form-group input:focus,
+.form-edicao .form-group textarea:focus {
+  border-color: #111111;
   outline: none;
+  box-shadow: none;
 }
 
-.coord-grid {
+.form-group input[type="file"] {
+  padding: 0.6rem;
+  background-color: #fafafa;
+  border: 1px dashed #cccccc;
+  cursor: pointer;
+}
+
+.form-group input[type="file"]::file-selector-button {
+  background-color: #111111;
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-right: 1rem;
+  transition: opacity 0.2s;
+}
+
+.form-group input[type="file"]::file-selector-button:hover {
+  opacity: 0.85;
+}
+
+.coord-grid, .form-edicao .coord-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  width: 100%;
 }
 
-.btn-submit {
-  background: #0066cc;
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding: 1rem;
+.btn-submit, .btn-salvar {
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.85rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-top: 1rem;
-  transition: background 0.3s;
+  margin-top: 0.5rem;
+  transition: opacity 0.2s;
+  width: 100%;
 }
 
-.btn-submit:hover {
-  background: #0052a3;
+.btn-submit:hover, .btn-salvar:hover {
+  opacity: 0.85;
 }
 
 .btn-submit:disabled {
-  background: #ccc;
+  background: #cccccc;
   cursor: not-allowed;
 }
 
-/* ✅ Footer */
+.form-botoes, .detalhes-botoes {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.btn-cancelar {
+  background: #f1f1f1;
+  color: #111111;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-cancelar:hover {
+  background: #e2e2e2;
+}
+
+/* ✅ Footer Fino e Fixo (Largura Total) */
 .footer {
   text-align: center;
-  padding: 1rem;
-  color: #666;
-  font-size: 0.9rem;
-  background: #f0f0f0;
+  padding: 0.85rem;
+  color: #777777;
+  font-size: 0.8rem;
+  background: #ffffff;
+  border-top: 1px solid #eaeaea;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
-/* Login */
+/* ✅ Login minimalista */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background: #f0f2f5;
+  background: #fafafa;
 }
 
 .login-form {
-  background: white;
-  padding: 2.5rem;
+  background: #ffffff;
+  padding: 3rem;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eaeaea;
   width: 100%;
   max-width: 400px;
   text-align: center;
 }
 
 .login-form h2 {
-  margin-bottom: 1rem;
-  color: #333;
+  margin-bottom: 0.5rem;
+  color: #111111;
+  font-size: 1.35rem;
+  font-weight: 600;
 }
 
 .login-form p {
-  color: #666;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
+  color: #666666;
+  margin-bottom: 2rem;
+  font-size: 0.85rem;
 }
 
 .error {
-  background: #f8d7da;
-  color: #721c24;
+  background: #fff5f5;
+  color: #c53030;
+  border: 1px solid #fed7d7;
   padding: 0.75rem;
   border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
 }
 
-/* Lista de locais */
-.lista-container {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+/* ✅ Selector de tipo centralizado */
+.tipo-selector, .tipo-seletor {
   width: 100%;
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 0 auto 1.5rem auto;
+  padding: 1.25rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
 }
 
-.lista-container h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
-  text-align: center;
-  font-size: 1.8rem;
-}
-
-.tabela-locais {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-
-.tabela-locais th,
-.tabela-locais td {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  text-align: left;
-}
-
-.tabela-locais th {
-  background: #e6f7ff;
-  font-weight: bold;
-}
-
-.tabela-locais tbody tr:nth-child(even) {
-  background: #f9f9f9;
-}
-
-.tabela-locais button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+.tipo-selector label, .tipo-seletor label {
   font-weight: 500;
-  transition: background 0.3s;
+  color: #333333;
+  font-size: 0.85rem;
 }
 
-.tabela-locais button:first-child {
-  background: #ffc107;
-  color: #000;
+.tipo-selector select, .tipo-seletor select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d1d1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  color: #111111;
 }
 
-.tabela-locais button:last-child {
-  background: #dc3545;
-  color: #fff;
-}
-
-.tabela-locais button:hover {
-  opacity: 0.9;
-}
-
-/* ✅ Cards */
+/* Grille de cards alinhada */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
-  margin-top: 1rem;
+  width: 100%;
 }
 
 .card-item {
-  background: white;
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid #eaeaea;
+  transition: border-color 0.2s ease;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-color: #111111;
 }
 
 .card-imagem {
   width: 100%;
-  height: 180px;
+  height: 200px;
   object-fit: cover;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eaeaea;
 }
 
 .card-conteudo {
-  padding: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
 }
 
 .card-nome {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111111;
 }
 
 .card-descricao {
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 1rem;
-  line-height: 1.4;
+  font-size: 0.85rem;
+  color: #666666;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .card-botoes {
-  display: flex;
-  gap: 0.5rem;
+  display: none;
 }
 
-.btn-editar, .btn-excluir {
-  flex: 1;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.btn-editar {
-  background: #ffc107;
-  color: #000;
-}
-
-.btn-excluir {
-  background: #dc3545;
-  color: #fff;
-}
-
-.btn-editar:hover {
-  background: #e0a800;
-}
-
-.btn-excluir:hover {
-  background: #c82333;
-}
-
-/* Detalhes */
+/* Detalhes e Carrossel */
 .detalhes-container {
-  background: white;
-  padding: 2rem;
+  background: #ffffff;
+  padding: 2.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eaeaea;
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
 .btn-voltar {
-  background: #f0f0f0;
-  color: #333;
-  border: none;
-  padding: 0.5rem 1rem;
+  background: transparent;
+  color: #111111;
+  border: 1px solid #d1d1d1;
+  padding: 0.4rem 0.9rem;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  margin-bottom: 1rem;
-  transition: background 0.3s;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s;
 }
 
 .btn-voltar:hover {
-  background: #e0e0e0;
+  border-color: #111111;
 }
-
-.detalhes-imagem {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  border: 1px solid #ddd;
-}
-
-.detalhes-info {
-  margin-bottom: 2rem;
-}
-
-.detalhes-info p {
-  margin-bottom: 0.75rem;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.detalhes-info strong {
-  color: #0066cc;
-}
-
-.detalhes-botoes {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.detalhes-botoes .btn-editar,
-.detalhes-botoes .btn-excluir {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-}
-
-/* Formulário de edição */
-.form-edicao {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-edicao .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-edicao .form-group label {
-  font-weight: 600;
-  color: #444;
-}
-
-.form-edicao .form-group input,
-.form-edicao .form-group textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border 0.3s;
-}
-
-.form-edicao .form-group input:focus,
-.form-edicao .form-group textarea:focus {
-  border-color: #0066cc;
-  outline: none;
-}
-
-.form-edicao .coord-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.form-botoes {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.btn-salvar {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-
-.btn-salvar:hover {
-  background: #218838;
-}
-
-.btn-cancelar {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-
-.btn-cancelar:hover {
-  background: #5a6268;
-}
-
-/* Selector de tipo */
-.tipo-selector {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: #f0f8ff;
-  border-radius: 8px;
-  border: 1px solid #b0e0e6;
-  width: 25%;
-  margin: auto;
-}
-
-.tipo-selector label {
-  font-weight: 600;
-  color: #0066cc;
-}
-
-.tipo-selector select {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-/* Lista wrapper */
-.lista-wrapper {
-  display: flex;
-  flex-direction: column; /* ✅ Um abaixo do outro */
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.tipo-seletor {
-  flex: 1;
-  padding: 1rem;
-  background: #f0f8ff;
-  border-radius: 8px;
-  border: 1px solid #b0e0e6;
-  min-width: 300px;
-}
-
-.tipo-seletor label {
-  font-weight: 600;
-  color: #0066cc;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.tipo-seletor select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-.cards-grid {
-  flex: 3;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-/* ✅ Carrossel de imagens */
 
 .carousel-container {
-  position: relative; /* ✅ Força posicionamento relativo */
+  position: relative;
   width: 100%;
-  height: 300px;
+  height: 400px;
   margin-bottom: 1.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: #f0f0f0;
+  background: #f4f4f4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -660,99 +470,97 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 12px;
 }
 
 .carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  background: rgba(255, 255, 255, 0.85);
+  color: #111111;
   border: none;
-  font-size: 2rem;
-  padding: 0.5rem 1rem;
+  font-size: 1.25rem;
   cursor: pointer;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  transition: background 0.3s;
+  transition: background 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .carousel-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: #ffffff;
 }
 
 .carousel-btn.esquerda {
-  left: 10px;
+  left: 16px;
 }
 
 .carousel-btn.direita {
-  right: 10px;
+  right: 16px;
 }
 
 .carousel-indicadores {
   position: absolute;
-  bottom: 10px;
+  bottom: 16px;
   left: 50%;
-  transform: translateX(-50%); /* ✅ Centraliza horizontalmente */
+  transform: translateX(-50%);
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   z-index: 10;
-  width: fit-content; /* ✅ Garante que o container não cresça */
-  margin: 0 auto; /* ✅ Força centralização */
 }
 
 .indicador {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 50%;
   cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
+  transition: all 0.2s;
 }
 
 .indicador.ativo {
-  background: white;
-  transform: scale(1.2); /* ✅ Aumenta a bolinha ativa */
+  background: #ffffff;
+  transform: scale(1.4);
 }
 
-/* ✅ Card clicável */
-.card-item.clicavel {
-  cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+.detalhes-info {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.card-item.clicavel:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+.detalhes-info p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #333333;
 }
 
-/* ✅ Remove botões da lista */
-.card-botoes {
-  display: none;
+.detalhes-info strong {
+  color: #111111;
 }
 
-/* Galeria de miniaturas */
+/* Galeria de miniaturas na edição */
 .galeria-miniaturas {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 12px;
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
 .miniatura-container {
   position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 8px;
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
   overflow: hidden;
-  border: 2px solid #ddd;
+  border: 1px solid #eaeaea;
 }
 
 .miniatura-imagem {
@@ -765,19 +573,20 @@ body {
   position: absolute;
   top: 4px;
   right: 4px;
-  background: rgba(255, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   border: none;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  font-size: 12px;
+  font-size: 10px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: background 0.2s;
 }
 
 .btn-remover-miniatura:hover {
-  background: rgba(255, 0, 0, 1);
+  background: #000000;
 }

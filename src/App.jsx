@@ -55,22 +55,12 @@ export default function App() {
 
   return (
     <div className="App">
-      {/* Header */}
+      {/* Header Slim de Linha Única */}
       <header className="header">
         <div className="header-top">
-                   
-            <h1>🏨 Guia da Cidade - Painel Administrativo</h1>
-            <div className="user-info">
-              <span className="user-email">{user.email}</span>
-              <button onClick={handleLogout} className="btn-logout">
-                Sair
-              </button>
-            </div>
-          
-        </div>
+          <h1>🏨 Guia da Cidade</h1>
 
-        {/* Menu de abas */}
-        <nav className="nav-abas">
+          {/* Menu de abas integrado na mesma linha */}
           <div className="abas-container">
             <button
               className={aba === 'cadastro' ? 'aba ativa' : 'aba'}
@@ -91,7 +81,14 @@ export default function App() {
               📋 Listas
             </button>
           </div>
-        </nav>
+
+          <div className="user-info">
+            <span className="user-email">{user.email}</span>
+            <button onClick={handleLogout} className="btn-logout">
+              Sair
+            </button>
+          </div>
+        </div>
       </header>
 
       {/* Conteúdo principal */}
@@ -130,7 +127,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="footer">
-        <p>© 2025 Guia da Cidade - Todos os direitos reservados</p>
+        <p>© 2026 Guia da Cidade - Todos os direitos reservados</p>
       </footer>
     </div>
   );

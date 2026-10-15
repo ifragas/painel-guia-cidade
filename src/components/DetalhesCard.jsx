@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '../firebase';
+import { api } from '../services/api';
 
 const extractFilePath = (url) => {
   if (!url) return null;
@@ -139,41 +139,33 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
 
     const todasUrls = [...formData.imagens, ...novasUrls];
 
+    // Removemos campos internos e extras que o Joi rejeita no body
+    const { id, _id, tipo: _tipo, createdAt, updatedAt, ...dadosLimpos } = formData;
+
     const payload = {
-      ...formData,
+      nome: dadosLimpos.nome,
+      descricao: dadosLimpos.descricao,
+      endereco: dadosLimpos.endereco || '',
+      horario: dadosLimpos.horario || '',
+      imagem: dadosLimpos.imagem || '',
       imagens: todasUrls,
-      latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-      longitude: formData.longitude ? parseFloat(formData.longitude) : null
+      latitude: dadosLimpos.latitude ? parseFloat(dadosLimpos.latitude) : null,
+      longitude: dadosLimpos.longitude ? parseFloat(dadosLimpos.longitude) : null
     };
 
-    console.log('📦 Dados enviados para a API:', payload);
+    console.log('📦 Payload limpo enviado:', payload);
 
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await fetch(`https://turismo-api-vv62.onrender.com/api/${tipo}/${item.id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
+      const result = await api.put(`/${tipo}/${item.id}`, payload);
 
-      const result = await response.json();
-
-      if (response.ok) {
-        alert('✅ Item atualizado com sucesso!');
-        setEditando(false);
-        setNovasImagens([]);
-        setArquivos([]);
-        onEdit(result);
-      } else {
-        alert('❌ Erro ao atualizar: ' + (result.error || 'Verifique os dados'));
-        console.error('Erro na API:', result);
-      }
+      alert('✅ Item atualizado com sucesso!');
+      setEditando(false);
+      setNovasImagens([]);
+      setArquivos([]);
+      onEdit(result);
     } catch (error) {
-      alert('❌ Erro de conexão. Confira se o servidor está rodando.');
-      console.error('Erro de rede:', error);
+      alert('❌ Erro ao atualizar: ' + error.message);
+      console.error('Erro na API:', error);
     }
   };
 
@@ -182,26 +174,15 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
     if (!window.confirm(`⚠️ Esta ação NÃO pode ser desfeita. Confirmar exclusão de "${item.nome}"?`)) return;
 
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await fetch(`https://turismo-api-vv62.onrender.com/api/${tipo}/${item.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      // Usando o serviço centralizado api.delete
+      await api.delete(`/${tipo}/${item.id}`);
 
-      if (response.ok) {
-        alert('✅ Item excluído com sucesso!');
-        onDelete(item.id);
-        onVoltar();
-      } else {
-        const result = await response.json();
-        alert('❌ Erro ao excluir: ' + (result.error || 'Verifique os dados'));
-        console.error('Erro na API:', result);
-      }
+      alert('✅ Item excluído com sucesso!');
+      onDelete(item.id);
+      onVoltar();
     } catch (error) {
-      alert('❌ Erro de conexão. Confira se o servidor está rodando.');
-      console.error('Erro de rede:', error);
+      alert('❌ Erro ao excluir: ' + error.message);
+      console.error('Erro na API:', error);
     }
   };
 

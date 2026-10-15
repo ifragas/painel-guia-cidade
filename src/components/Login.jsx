@@ -12,7 +12,7 @@ export default function Login({ onLogin }) {
     setError('');
 
     try {
-      const response = await fetch('https://turismo-api-vv62.onrender.com/api/login', {
+      const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

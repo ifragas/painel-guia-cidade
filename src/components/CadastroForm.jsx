@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
+import api from '../services/api'; // 👈 Importe o serviço centralizado
 
 export default function CadastroForm() {
   const [tipo, setTipo] = useState('pontos-turisticos');
@@ -63,62 +64,45 @@ export default function CadastroForm() {
     }
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let imagensURL = [];
-    try {
-      imagensURL = await uploadImages();
-    } catch (error) {
-      return;
-    }
+    setUploading(true);
+    const formData = new FormData();
+    
+    // Adiciona os campos de texto
+    formData.append('nome', dados.nome);
+    formData.append('descricao', dados.descricao);
+    formData.append('endereco', dados.endereco);
+    formData.append('horario', dados.horario);
+    formData.append('latitude', dados.latitude);
+    formData.append('longitude', dados.longitude);
 
-    if (!Array.isArray(imagensURL)) imagensURL = [];
-
-    const primeiraImagemURL = imagensURL.length > 0 ? imagensURL[0] : null;
-
-    const payload = {
-      ...dados,
-      imagens: imagensURL,
-      imagem: primeiraImagemURL,
-      latitude: dados.latitude ? parseFloat(dados.latitude) : null,
-      longitude: dados.longitude ? parseFloat(dados.longitude) : null,
-      tipo
-    };
-
-    console.log('📦 Dados enviados para a API:', payload);
+    // Adiciona os ficheiros selecionados
+    files.forEach((file) => {
+      formData.append('imagens', file); // 'imagens' deve coincidir com o upload.array('imagens') do backend
+    });
 
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await fetch(`https://turismo-api-vv62.onrender.com/api/${tipo}`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
+      // Envia diretamente para o nosso serviço centralizado api.js
+      // Nota: o axios ajusta automaticamente o Content-Type para multipart/form-data ao receber um FormData
+      const result = await api.post(`/${tipo}`, formData);
+
+      alert('✅ Cadastrado com sucesso!');
+      setDados({
+        nome: '',
+        descricao: '',
+        endereco: '',
+        horario: '',
+        latitude: '',
+        longitude: ''
       });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert('✅ Cadastrado com sucesso!');
-        setDados({
-          nome: '',
-          descricao: '',
-          endereco: '',
-          horario: '',
-          latitude: '',
-          longitude: ''
-        });
-        setFiles([]);
-      } else {
-        alert('❌ Erro: ' + (result.error || 'Verifique os dados'));
-        console.error('Erro na API:', result);
-      }
+      setFiles([]);
+      setUploading(false);
     } catch (error) {
-      alert('❌ Erro de conexão. Confira se o servidor está rodando.');
-      console.error('Erro de rede:', error);
+      setUploading(false);
+      alert('❌ Erro: ' + (error.response?.data?.error || error.message));
+      console.error('Erro na API:', error);
     }
   };
 
