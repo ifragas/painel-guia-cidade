@@ -1007,7 +1007,7 @@ body {
   }
 }
 
-/* --- RESPONSIVIDADE PRECISA PARA MOBILE --- */
+/* --- RESPONSIVIDADE OTIMIZADA PARA MOBILE (2 LINHAS NO HEADER) --- */
 
 @media screen and (max-width: 768px) {
   body, html, #root {
@@ -1017,21 +1017,28 @@ body {
     padding: 0;
   }
 
-  /* 1. Header Fixo no Topo: Logo à esquerda, Email e Sair à direita */
+  /* 1. Header principal reorganizado em 2 linhas limpas */
   header {
     display: flex !important;
-    flex-direction: row !important;
+    flex-wrap: wrap !important;
     justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
-    padding: 10px 14px !important;
+    padding: 10px 12px !important;
     box-sizing: border-box;
     background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
-    position: relative;
+    gap: 8px;
   }
 
-  /* Garante que o bloco do utilizador (email + sair) apareça compacto no canto superior direito */
+  /* Título / Logo na primeira linha à esquerda */
+  header > h1, 
+  header > div:first-child {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+
+  /* Bloco do utilizador (E-mail + Botão Sair) na primeira linha à direita */
   header div:last-child,
   .user-info, 
   .auth-nav {
@@ -1039,11 +1046,12 @@ body {
     flex-direction: row !important;
     align-items: center !important;
     gap: 6px !important;
+    margin-left: auto;
   }
 
   header div:last-child span {
     font-size: 11px;
-    max-width: 100px;
+    max-width: 110px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1058,21 +1066,28 @@ body {
     border: 1px solid #fecaca !important;
     border-radius: 6px;
     cursor: pointer;
+    white-space: nowrap;
   }
 
-  /* 2. Barra Secundária de Navegação (Botões Cadastrar e Listas) logo abaixo do Header */
-  /* Se os botões estiverem logo abaixo do header na árvore DOM, damos destaque a eles */
-  header + div,
-  .botoes-navegacao-topo,
-  .nav-principal {
+  /* 2. Barra de navegação secundária (Cadastrar / Listas) logo abaixo, ocupando a largura total */
+  .botoes-navegacao,
+  .nav-botoes-principal,
+  header .botoes-extras {
     display: flex !important;
     justify-content: center !important;
-    gap: 12px !important;
-    padding: 10px 16px !important;
+    gap: 10px !important;
+    width: 100% !important;
+    padding: 8px 0 !important;
     background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
-    width: 100%;
+    border-top: 1px solid #f3f4f6;
+    margin-top: 4px;
     box-sizing: border-box;
+  }
+
+  .botoes-navegacao button,
+  .nav-botoes-principal button {
+    padding: 6px 14px;
+    font-size: 13px;
   }
 
   /* Ajustes gerais de layout mobile para cards e formulários */
