@@ -691,79 +691,82 @@ body {
 
 
 /* ========================================================== */
-/* ✅ RESPONSIVIDADE PERFEITA PARA MOBILE (AJUSTE DO HEADER)  */
+/* ✅ RESPONSIVIDADE PERFEITA: E-MAIL E SAIR NA MESMA LINHA   */
 /* ========================================================== */
 
 @media screen and (max-width: 768px) {
   .header {
-    padding: 10px 14px;
+    padding: 8px 10px;
     height: auto;
   }
 
-  /* Organiza o header em 2 linhas limpas no telemóvel */
+  /* Mantém o header-top em linha única para o título e o bloco do usuário */
   .header-top {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 4px;
   }
 
-  /* Linha 1: Título à esquerda e Utilizador (E-mail + Sair) à direita */
-  .header-top > div:first-child,
-  .header > h1 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+  .header h1 {
+    font-size: 0.9rem !important;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .user-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
     margin-left: auto;
   }
 
   .user-email {
-    font-size: 11px;
-    max-width: 120px;
+    font-size: 10px !important;
+    max-width: 90px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .btn-logout {
-    padding: 3px 6px;
-    font-size: 10px;
+    padding: 2px 5px !important;
+    font-size: 10px !important;
+    white-space: nowrap;
   }
 
-  /* Linha 2: Botões de navegação (Cadastrar / Listas) organizados numa barra dedicada logo abaixo */
+  /* Barra de navegação secundária (Cadastrar / Listas) logo abaixo */
   .nav-abas {
     width: 100%;
     display: flex;
     justify-content: center;
     border-top: 1px solid #eaeaea;
-    padding-top: 8px;
-    margin-top: 2px;
+    padding-top: 6px;
+    margin-top: 6px;
   }
 
   .abas-container {
     display: flex;
     justify-content: center;
     width: 100%;
-    gap: 10px;
+    gap: 8px;
   }
 
   .aba {
     flex: 1;
     text-align: center;
-    padding: 6px 10px;
-    font-size: 13px;
+    padding: 5px 8px;
+    font-size: 12px;
     background: #f4f4f4;
   }
 
   /* Ajustes gerais de espaçamento em mobile */
   .main {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.5rem;
   }
 
   .content-container, 
@@ -771,7 +774,7 @@ body {
   .form-edicao, 
   .lista-container, 
   .detalhes-container {
-    padding: 16px;
+    padding: 12px;
     max-width: 100%;
   }
 
@@ -790,7 +793,7 @@ body {
 
   .form-edicao-moderno input,
   .form-edicao-moderno textarea {
-    font-size: 16px; /* Evita zoom automático no iOS/Android */
+    font-size: 16px;
   }
 
   .detalhes-carousel {
