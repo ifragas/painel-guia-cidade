@@ -1,20 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage } from '../firebase';
 import { api } from '../services/api';
-
-const extractFilePath = (url) => {
-  if (!url) return null;
-  const regex = /o\/(.+?)\?/;
-  const match = url.match(regex);
-  return match ? decodeURIComponent(match[1]) : null;
-};
 
 export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete }) {
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({ ...item });
-  const [novasImagens, setNovasImagens] = useState([]);
-  const [arquivos, setArquivos] = useState([]);
+  const [novasImagensPreviews, setNovasImagensPreviews] = useState([]);
+  const [arquivosNovos, setArquivosNovos] = useState([]);
 
   const indiceRef = useRef(0);
   const [indiceImagem, setIndiceImagem] = useState(0);
@@ -50,96 +41,87 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const cleanFileName = (originalName) => {
-    return originalName
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9.]/g, '_')
-      .replace(/_{2,}/g, '_')
-      .replace(/^_+|_+$/g, '');
-  };
-
-  const uploadImages = async () => {
-    if (arquivos.length === 0) return [];
-    const urls = [];
-    try {
-      for (let file of arquivos) {
-        if (!file) continue;
-        const cleanedName = cleanFileName(file.name);
-        const fileName = Date.now() + '_' + cleanedName;
-        const storageRef = ref(storage, `imagens/${tipo}/${fileName}`);
-
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-        urls.push(downloadURL.replace(/\s+/g, '').trim());
-      }
-      return urls;
-    } catch (error) {
-      alert('Erro ao fazer upload das imagens: ' + error.message);
-      throw error;
-    }
-  };
-
-  const removerImagem = async (index) => {
-    const url = formData.imagens[index];
-    if (!url) return;
-
-    if (!window.confirm(`🗑️ Deseja REMOVER esta imagem?`)) return;
-
-    try {
-      const filePath = extractFilePath(url);
-      if (filePath) {
-        const storageRef = ref(storage, filePath);
-        await deleteObject(storageRef);
-      }
-      const novas = [...formData.imagens];
-      novas.splice(index, 1);
-      setFormData({ ...formData, imagens: novas });
-    } catch (error) {
-      alert('❌ Erro ao remover imagem: ' + error.message);
-    }
-  };
-
   const adicionarImagens = (e) => {
     const files = Array.from(e.target.files);
-    const urls = files.map(file => URL.createObjectURL(file));
-    setArquivos(files);
-    setNovasImagens(urls);
+    if (files.length === 0) return;
+
+    // Cria previews locais para exibição imediata
+    const previews = files.map(file => URL.createObjectURL(file));
+    setArquivosNovos(prev => [...prev, ...files]);
+    setNovasImagensPreviews(prev => [...prev, ...previews]);
     e.target.value = '';
+  };
+
+  const removerImagemExistente = (index) => {
+    if (!window.confirm('🗑️ Deseja remover esta imagem?')) return;
+    const novas = [...formData.imagens];
+    novas.splice(index, 1);
+    setFormData({ ...formData, imagens: novas });
+  };
+
+  const removerNovaImagemPrevia = (index) => {
+    setNovasImagensPreviews(prev => prev.filter((_, i) => i !== index));
+    setArquivosNovos(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let novasUrls = [];
-    try {
-      novasUrls = await uploadImages();
-    } catch (error) {
-      return;
-    }
-
-    const todasUrls = [...formData.imagens, ...novasUrls];
-    const { id, _id, tipo: _tipo, createdAt, updatedAt, ...dadosLimpos } = formData;
-
-    const payload = {
-      nome: dadosLimpos.nome,
-      descricao: dadosLimpos.descricao,
-      endereco: dadosLimpos.endereco || '',
-      horario: dadosLimpos.horario || '',
-      imagem: dadosLimpos.imagem || '',
-      imagens: todasUrls,
-      latitude: dadosLimpos.latitude ? parseFloat(dadosLimpos.latitude) : null,
-      longitude: dadosLimpos.longitude ? parseFloat(dadosLimpos.longitude) : null
-    };
 
     try {
-      const result = await api.put(`/${tipo}/${item.id}`, payload);
+      // Monta o FormData para enviar texto e arquivos via Multipart/form-data para a API do Render
+      const dataForm = new FormData();
+      dataForm.append('nome', formData.nome || '');
+      dataForm.append('descricao', formData.descricao || '');
+      dataForm.append('endereco', formData.endereco || '');
+      dataForm.append('horario', formData.horario || '');
+      
+      if (formData.latitude !== null && formData.latitude !== undefined) {
+        dataForm.append('latitude', formData.latitude);
+      }
+      if (formData.longitude !== null && formData.longitude !== undefined) {
+        dataForm.append('longitude', formData.longitude);
+      }
+
+      // Envia as URLs das imagens que já existiam e foram mantidas
+      if (Array.isArray(formData.imagens)) {
+        formData.imagens.forEach(url => {
+          dataForm.append('imagensExistentes', url);
+        });
+      }
+
+      // Adiciona os novos arquivos binários para o backend fazer o upload seguro
+      arquivosNovos.forEach(file => {
+        dataForm.append('imagens', file);
+      });
+
+      console.log('📦 Enviando atualização via API...');
+
+      // Como a api.js padrão usa JSON, vamos usar fetch com o token do localStorage para suportar FormData
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch(`${import.meta.env.PROD ? 'https://turismo-api-vv62.onrender.com/api' : 'http://localhost:3000/api'}/${tipo}/${item.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // Não definir Content-Type ao usar FormData, o browser faz isso automaticamente com o boundary
+        },
+        body: dataForm
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao atualizar item');
+      }
+
       alert('✅ Item atualizado com sucesso!');
       setEditando(false);
-      setNovasImagens([]);
-      setArquivos([]);
+      setNovasImagensPreviews([]);
+      setArquivosNovos([]);
       onEdit(result);
+
     } catch (error) {
       alert('❌ Erro ao atualizar: ' + error.message);
+      console.error('Erro na API:', error);
     }
   };
 
@@ -309,28 +291,25 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
               <label>Gerenciar Galeria de Imagens</label>
               <div className="galeria-miniaturas">
                 {formData.imagens?.map((url, index) => (
-                  <div key={index} className="miniatura-container">
+                  <div key={`existente-${index}`} className="miniatura-container">
                     <img src={url} alt={`Miniatura ${index + 1}`} className="miniatura-imagem" />
                     <button
                       type="button"
                       className="btn-remover-miniatura"
-                      onClick={() => removerImagem(index)}
+                      onClick={() => removerImagemExistente(index)}
                     >
                       ✕
                     </button>
                   </div>
                 ))}
 
-                {novasImagens.map((url, index) => (
+                {novasImagensPreviews.map((url, index) => (
                   <div key={`nova-${index}`} className="miniatura-container">
-                    <img src={url} alt={`Nova Imagem ${index + 1}`} className="miniatura-imagem" />
+                    <img src={url} alt={`Nova Prévia ${index + 1}`} className="miniatura-imagem" />
                     <button
                       type="button"
                       className="btn-remover-miniatura"
-                      onClick={() => {
-                        setNovasImagens(prev => prev.filter((_, i) => i !== index));
-                        setArquivos(prev => prev.filter((_, i) => i !== index));
-                      }}
+                      onClick={() => removerNovaImagemPrevia(index)}
                     >
                       ✕
                     </button>
