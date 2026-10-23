@@ -44,7 +44,7 @@ export default function Login({ onLogin }) {
     'mb-2 block text-xs font-bold uppercase tracking-wider text-slate-600';
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-8">
+    <div className="flex min-h-screen items-center justify-center bg-emerald-600 px-4 py-8">
       <div className="flex w-full max-w-md flex-col items-center rounded-3xl border border-slate-100 bg-white p-8 shadow-2xl sm:p-10">
 
         {/* Logotipo */}
