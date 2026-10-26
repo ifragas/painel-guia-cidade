@@ -35,6 +35,9 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     coordenadas: ''
   });
 
+  // Estado para controlar se o local é sempre aberto
+  const [sempreAberto, setSempreAberto] = useState(false);
+
   // Estado para gerenciar os horários por dia da semana
   const [horariosPorDia, setHorariosPorDia] = useState(
     DIAS_SEMANA.reduce((acc, dia) => {
@@ -99,17 +102,20 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     formData.append('descricao', dados.descricao);
     formData.append('endereco', dados.endereco);
     formData.append('coordenadas', dados.coordenadas);
+    formData.append('sempreAberto', sempreAberto);
 
     // Filtra apenas os dias ativos e envia o objeto de horários estruturado
     const horariosPayload = {};
-    Object.keys(horariosPorDia).forEach((dia) => {
-      if (horariosPorDia[dia].ativo) {
-        horariosPayload[dia] = {
-          abertura: horariosPorDia[dia].abertura,
-          fecho: horariosPorDia[dia].fecho
-        };
-      }
-    });
+    if (!sempreAberto) {
+      Object.keys(horariosPorDia).forEach((dia) => {
+        if (horariosPorDia[dia].ativo) {
+          horariosPayload[dia] = {
+            abertura: horariosPorDia[dia].abertura,
+            fecho: horariosPorDia[dia].fecho
+          };
+        }
+      });
+    }
     formData.append('horarios', JSON.stringify(horariosPayload));
 
     files.forEach((file) => {
@@ -128,6 +134,7 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
         coordenadas: ''
       });
 
+      setSempreAberto(false);
       setHorariosPorDia(
         DIAS_SEMANA.reduce((acc, dia) => {
           acc[dia.id] = { ativo: false, abertura: '08:00', fecho: '18:00' };
@@ -296,68 +303,88 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
           />
         </div>
 
-        {/* Gestor de Horários de Funcionamento */}
+        {/* Gestor de Horários de Funcionamento & Opção Sempre Aberto */}
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-          <div className="flex items-center gap-2 text-slate-700">
-            <Clock size={18} className="text-emerald-600" />
-            <h4 className="text-sm font-bold">
-              Horário de Funcionamento por Dia da Semana
-            </h4>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-slate-700">
+              <Clock size={18} className="text-emerald-600" />
+              <h4 className="text-sm font-bold">
+                Horário de Funcionamento
+              </h4>
+            </div>
+
+            {/* Checkbox "Sempre Aberto" */}
+            <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+              <input
+                type="checkbox"
+                checked={sempreAberto}
+                onChange={(e) => setSempreAberto(e.target.checked)}
+                className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+              />
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">
+                Sempre Aberto
+              </span>
+            </label>
           </div>
+
           <p className="text-xs text-slate-500">
-            Ative os dias em que o local funciona e configure o intervalo de atendimento.
+            {sempreAberto
+              ? 'Local configurado como sempre aberto (acesso livre sem restrição de horários).'
+              : 'Ative os dias em que o local funciona e configure o intervalo de atendimento.'}
           </p>
 
-          <div className="space-y-3 pt-2">
-            {DIAS_SEMANA.map((dia) => {
-              const item = horariosPorDia[dia.id];
-              return (
-                <div
-                  key={dia.id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3 ${
-                    item.ativo
-                      ? 'bg-white border-emerald-200 shadow-sm'
-                      : 'bg-slate-100/60 border-slate-200/60 opacity-70'
-                  }`}
-                >
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={item.ativo}
-                      onChange={() => handleToggleDia(dia.id)}
-                      className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
-                    />
-                    <span className="text-sm font-semibold text-slate-800 min-w-[110px]">
-                      {dia.label}
-                    </span>
-                  </label>
+          {!sempreAberto && (
+            <div className="space-y-3 pt-2">
+              {DIAS_SEMANA.map((dia) => {
+                const item = horariosPorDia[dia.id];
+                return (
+                  <div
+                    key={dia.id}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3 ${
+                      item.ativo
+                        ? 'bg-white border-emerald-200 shadow-sm'
+                        : 'bg-slate-100/60 border-slate-200/60 opacity-70'
+                    }`}
+                  >
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={item.ativo}
+                        onChange={() => handleToggleDia(dia.id)}
+                        className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                      />
+                      <span className="text-sm font-semibold text-slate-800 min-w-[110px]">
+                        {dia.label}
+                      </span>
+                    </label>
 
-                  {item.ativo ? (
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-slate-500 font-medium">Das</span>
-                      <input
-                        type="time"
-                        value={item.abertura}
-                        onChange={(e) => handleHorarioChange(dia.id, 'abertura', e.target.value)}
-                        className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
-                      />
-                      <span className="text-slate-500 font-medium">às</span>
-                      <input
-                        type="time"
-                        value={item.fecho}
-                        onChange={(e) => handleHorarioChange(dia.id, 'fecho', e.target.value)}
-                        className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
-                      />
-                    </div>
-                  ) : (
-                    <span className="text-xs text-slate-400 italic font-medium px-2">
-                      Fechado / Não informado
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    {item.ativo ? (
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-slate-500 font-medium">Das</span>
+                        <input
+                          type="time"
+                          value={item.abertura}
+                          onChange={(e) => handleHorarioChange(dia.id, 'abertura', e.target.value)}
+                          className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                        />
+                        <span className="text-slate-500 font-medium">às</span>
+                        <input
+                          type="time"
+                          value={item.fecho}
+                          onChange={(e) => handleHorarioChange(dia.id, 'fecho', e.target.value)}
+                          className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-400 italic font-medium px-2">
+                        Fechado / Não informado
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Upload de imagens */}
