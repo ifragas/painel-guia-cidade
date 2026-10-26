@@ -27,7 +27,12 @@ const DIAS_SEMANA = [
 
 export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete }) {
   const [editando, setEditando] = useState(false);
-  const [formData, setFormData] = useState({ ...item });
+  
+  // 🔹 Inicializa o formData garantindo que as coordenadas venham preenchidas corretamente
+  const [formData, setFormData] = useState({
+    ...item,
+    coordenadas: item.coordenadas || (item.latitude && item.longitude ? `${item.latitude}, ${item.longitude}` : '')
+  });
   
   // Estado para controlar a opção "Sempre Aberto"
   const [sempreAberto, setSempreAberto] = useState(Boolean(item.sempreAberto));
