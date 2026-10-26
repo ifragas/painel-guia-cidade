@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import {
@@ -11,8 +10,20 @@ import {
   Loader2,
   CheckCircle2,
   X,
+  Plus,
+  Trash2,
   Image as ImageIcon
 } from 'lucide-react';
+
+const DIAS_SEMANA = [
+  { id: 'segunda', label: 'Segunda-feira' },
+  { id: 'terca', label: 'Terça-feira' },
+  { id: 'quarta', label: 'Quarta-feira' },
+  { id: 'quinta', label: 'Quinta-feira' },
+  { id: 'sexta', label: 'Sexta-feira' },
+  { id: 'sabado', label: 'Sábado' },
+  { id: 'domingo', label: 'Domingo' }
+];
 
 export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
   const [tipo, setTipo] = useState(tipoProp || 'pontos-turisticos');
@@ -21,10 +32,16 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     nome: '',
     descricao: '',
     endereco: '',
-    horario: '',
-    latitude: '',
-    longitude: ''
+    coordenadas: ''
   });
+
+  // Estado para gerenciar os horários por dia da semana
+  const [horariosPorDia, setHorariosPorDia] = useState(
+    DIAS_SEMANA.reduce((acc, dia) => {
+      acc[dia.id] = { ativo: false, abertura: '08:00', fecho: '18:00' };
+      return acc;
+    }, {})
+  );
 
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -46,6 +63,28 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     }));
   };
 
+  // Alterna o dia ativo no gestor de horários
+  const handleToggleDia = (diaId) => {
+    setHorariosPorDia((prev) => ({
+      ...prev,
+      [diaId]: {
+        ...prev[diaId],
+        ativo: !prev[diaId].ativo
+      }
+    }));
+  };
+
+  // Atualiza o horário de abertura ou fecho de um dia específico
+  const handleHorarioChange = (diaId, campo, valor) => {
+    setHorariosPorDia((prev) => ({
+      ...prev,
+      [diaId]: {
+        ...prev[diaId],
+        [campo]: valor
+      }
+    }));
+  };
+
   // Realiza o cadastro.
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,9 +98,19 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     formData.append('nome', dados.nome);
     formData.append('descricao', dados.descricao);
     formData.append('endereco', dados.endereco);
-    formData.append('horario', dados.horario);
-    formData.append('latitude', dados.latitude);
-    formData.append('longitude', dados.longitude);
+    formData.append('coordenadas', dados.coordenadas);
+
+    // Filtra apenas os dias ativos e envia o objeto de horários estruturado
+    const horariosPayload = {};
+    Object.keys(horariosPorDia).forEach((dia) => {
+      if (horariosPorDia[dia].ativo) {
+        horariosPayload[dia] = {
+          abertura: horariosPorDia[dia].abertura,
+          fecho: horariosPorDia[dia].fecho
+        };
+      }
+    });
+    formData.append('horarios', JSON.stringify(horariosPayload));
 
     files.forEach((file) => {
       formData.append('imagens', file);
@@ -76,10 +125,15 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
         nome: '',
         descricao: '',
         endereco: '',
-        horario: '',
-        latitude: '',
-        longitude: ''
+        coordenadas: ''
       });
+
+      setHorariosPorDia(
+        DIAS_SEMANA.reduce((acc, dia) => {
+          acc[dia.id] = { ativo: false, abertura: '08:00', fecho: '18:00' };
+          return acc;
+        }, {})
+      );
 
       setFiles([]);
 
@@ -225,41 +279,85 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
           />
         </div>
 
-        {/* Endereço e horário */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Endereço */}
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+            <MapPin size={14} className="text-slate-400" />
+            Endereço
+          </label>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
-              <MapPin size={14} className="text-slate-400" />
-              Endereço
-            </label>
+          <input
+            type="text"
+            name="endereco"
+            value={dados.endereco}
+            onChange={handleChange}
+            placeholder="Ex: Localidade de Linha 5, Riozinho - RS"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
+          />
+        </div>
 
-            <input
-              type="text"
-              name="endereco"
-              value={dados.endereco}
-              onChange={handleChange}
-              placeholder="Ex: Localidade de Linha 5, Riozinho - RS"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
-            />
+        {/* Gestor de Horários de Funcionamento */}
+        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div className="flex items-center gap-2 text-slate-700">
+            <Clock size={18} className="text-emerald-600" />
+            <h4 className="text-sm font-bold">
+              Horário de Funcionamento por Dia da Semana
+            </h4>
           </div>
+          <p className="text-xs text-slate-500">
+            Ative os dias em que o local funciona e configure o intervalo de atendimento.
+          </p>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
-              <Clock size={14} className="text-slate-400" />
-              Horário de Funcionamento
-            </label>
+          <div className="space-y-3 pt-2">
+            {DIAS_SEMANA.map((dia) => {
+              const item = horariosPorDia[dia.id];
+              return (
+                <div
+                  key={dia.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3 ${
+                    item.ativo
+                      ? 'bg-white border-emerald-200 shadow-sm'
+                      : 'bg-slate-100/60 border-slate-200/60 opacity-70'
+                  }`}
+                >
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={item.ativo}
+                      onChange={() => handleToggleDia(dia.id)}
+                      className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span className="text-sm font-semibold text-slate-800 min-w-[110px]">
+                      {dia.label}
+                    </span>
+                  </label>
 
-            <input
-              type="text"
-              name="horario"
-              value={dados.horario}
-              onChange={handleChange}
-              placeholder="Ex: Segunda a Domingo, das 08h às 18h"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
-            />
+                  {item.ativo ? (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-slate-500 font-medium">Das</span>
+                      <input
+                        type="time"
+                        value={item.abertura}
+                        onChange={(e) => handleHorarioChange(dia.id, 'abertura', e.target.value)}
+                        className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                      />
+                      <span className="text-slate-500 font-medium">às</span>
+                      <input
+                        type="time"
+                        value={item.fecho}
+                        onChange={(e) => handleHorarioChange(dia.id, 'fecho', e.target.value)}
+                        className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic font-medium px-2">
+                      Fechado / Não informado
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
-
         </div>
 
         {/* Upload de imagens */}
@@ -333,7 +431,7 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
                       type="button"
                       onClick={() => handleRemoveFile(idx)}
                       aria-label={`Remover imagem ${file.name}`}
-                      className="text-slate-400 hover:text-rose-600 transition-colors ml-1"
+                      className="text-slate-400 hover:text-rose-600 transition-colors ml-1 cursor-pointer"
                     >
                       <X size={14} />
                     </button>
@@ -344,7 +442,7 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
           )}
         </div>
 
-        {/* Coordenadas geográficas */}
+        {/* Coordenadas geográficas unificadas */}
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
 
           <div className="flex items-center gap-2 text-slate-700">
@@ -355,39 +453,24 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             </h4>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
+              Latitude e Longitude (Separadas por vírgula)
+            </label>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Latitude
-              </label>
-
-              <input
-                type="text"
-                name="latitude"
-                value={dados.latitude}
-                onChange={handleChange}
-                placeholder="Ex: -29.6288"
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Longitude
-              </label>
-
-              <input
-                type="text"
-                name="longitude"
-                value={dados.longitude}
-                onChange={handleChange}
-                placeholder="Ex: -50.4533"
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
-              />
-            </div>
-
+            <input
+              type="text"
+              name="coordenadas"
+              value={dados.coordenadas}
+              onChange={handleChange}
+              placeholder="Ex: -29.6288, -50.4533"
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
+            />
+            <p className="text-[11px] text-slate-400 mt-1">
+              Dica: Pode copiar diretamente do Google Maps (ex: <code className="text-slate-600">-29.6288, -50.4533</code>).
+            </p>
           </div>
+
         </div>
 
         {/* Botão de envio */}

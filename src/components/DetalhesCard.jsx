@@ -15,9 +15,33 @@ import {
   ChevronRight 
 } from 'lucide-react';
 
+const DIAS_SEMANA = [
+  { id: 'segunda', label: 'Segunda-feira' },
+  { id: 'terca', label: 'Terça-feira' },
+  { id: 'quarta', label: 'Quarta-feira' },
+  { id: 'quinta', label: 'Quinta-feira' },
+  { id: 'sexta', label: 'Sexta-feira' },
+  { id: 'sabado', label: 'Sábado' },
+  { id: 'domingo', label: 'Domingo' }
+];
+
 export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete }) {
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({ ...item });
+  
+  // Inicializa o estado de horários para edição com base no que já vem do item (ou padrão vazio)
+  const [horariosPorDia, setHorariosPorDia] = useState(() => {
+    const initialHorarios = item.horarios && typeof item.horarios === 'object' ? item.horarios : {};
+    return DIAS_SEMANA.reduce((acc, dia) => {
+      acc[dia.id] = {
+        ativo: !!initialHorarios[dia.id],
+        abertura: initialHorarios[dia.id]?.abertura || '08:00',
+        fecho: initialHorarios[dia.id]?.fecho || '18:00'
+      };
+      return acc;
+    }, {});
+  });
+
   const [novasImagensPreviews, setNovasImagensPreviews] = useState([]);
   const [arquivosNovos, setArquivosNovos] = useState([]);
   const [salvando, setSalvando] = useState(false);
@@ -48,6 +72,26 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleToggleDia = (diaId) => {
+    setHorariosPorDia((prev) => ({
+      ...prev,
+      [diaId]: {
+        ...prev[diaId],
+        ativo: !prev[diaId].ativo
+      }
+    }));
+  };
+
+  const handleHorarioChange = (diaId, campo, valor) => {
+    setHorariosPorDia((prev) => ({
+      ...prev,
+      [diaId]: {
+        ...prev[diaId],
+        [campo]: valor
+      }
+    }));
   };
 
   const adicionarImagens = (e) => {
@@ -81,14 +125,19 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
       dataForm.append('nome', formData.nome || '');
       dataForm.append('descricao', formData.descricao || '');
       dataForm.append('endereco', formData.endereco || '');
-      dataForm.append('horario', formData.horario || '');
+      dataForm.append('coordenadas', formData.coordenadas || '');
       
-      if (formData.latitude !== null && formData.latitude !== undefined) {
-        dataForm.append('latitude', formData.latitude);
-      }
-      if (formData.longitude !== null && formData.longitude !== undefined) {
-        dataForm.append('longitude', formData.longitude);
-      }
+      // Monta o objeto de horários ativos
+      const horariosPayload = {};
+      Object.keys(horariosPorDia).forEach((dia) => {
+        if (horariosPorDia[dia].ativo) {
+          horariosPayload[dia] = {
+            abertura: horariosPorDia[dia].abertura,
+            fecho: horariosPorDia[dia].fecho
+          };
+        }
+      });
+      dataForm.append('horarios', JSON.stringify(horariosPayload));
 
       if (Array.isArray(formData.imagens)) {
         formData.imagens.forEach(url => {
@@ -246,16 +295,30 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 </span>
               </div>
 
-              {item.horario && (
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
-                    <Clock size={14} /> Horário de Funcionamento
+              {/* Horários de Funcionamento Estruturados */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1">
+                  <Clock size={14} className="text-emerald-600" /> Horário de Funcionamento
+                </span>
+                {item.horarios && typeof item.horarios === 'object' && Object.keys(item.horarios).length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
+                    {DIAS_SEMANA.map((dia) => {
+                      const h = item.horarios[dia.id];
+                      if (!h) return null;
+                      return (
+                        <div key={dia.id} className="bg-white px-3 py-2 rounded-xl border border-slate-200/80 text-xs flex justify-between items-center">
+                          <span className="font-semibold text-slate-700">{dia.label}:</span>
+                          <span className="text-emerald-700 font-medium">{h.abertura} às {h.fecho}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <span className="text-sm font-medium text-slate-600">
+                    {typeof item.horarios === 'string' ? item.horarios : (item.horario || 'Não informado')}
                   </span>
-                  <span className="text-sm font-medium text-slate-800">
-                    {item.horario}
-                  </span>
-                </div>
-              )}
+                )}
+              </div>
 
               {item.endereco && (
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
@@ -277,13 +340,13 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 </p>
               </div>
 
-              {(item.latitude && item.longitude) && (
+              {item.coordenadas && (
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
                   <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
                     <Globe size={14} /> Coordenadas Geográficas
                   </span>
                   <span className="text-sm font-medium text-slate-800 font-mono">
-                    Latitude: {item.latitude}, Longitude: {item.longitude}
+                    {item.coordenadas}
                   </span>
                 </div>
               )}
@@ -312,7 +375,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 value={formData.nome}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-600 transition-all"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
               />
             </div>
 
@@ -326,63 +389,102 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 onChange={handleChange}
                 rows="4"
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-600 transition-all resize-y"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all resize-y"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Endereço
-                </label>
-                <input
-                  type="text"
-                  name="endereco"
-                  value={formData.endereco || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-600 transition-all"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Endereço
+              </label>
+              <input
+                type="text"
+                name="endereco"
+                value={formData.endereco || ''}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
+              />
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Horário
-                </label>
-                <input
-                  type="text"
-                  name="horario"
-                  value={formData.horario || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-600 transition-all"
-                />
+            {/* Gestor de Horários de Funcionamento */}
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 text-slate-700">
+                <Clock size={18} className="text-emerald-600" />
+                <h4 className="text-sm font-bold">
+                  Horário de Funcionamento por Dia da Semana
+                </h4>
+              </div>
+              <p className="text-xs text-slate-500">
+                Ative os dias em que o local funciona e configure o intervalo de atendimento.
+              </p>
+
+              <div className="space-y-3 pt-2">
+                {DIAS_SEMANA.map((dia) => {
+                  const itemDia = horariosPorDia[dia.id] || { ativo: false, abertura: '08:00', fecho: '18:00' };
+                  return (
+                    <div
+                      key={dia.id}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3 ${
+                        itemDia.ativo
+                          ? 'bg-white border-emerald-200 shadow-sm'
+                          : 'bg-slate-100/60 border-slate-200/60 opacity-70'
+                      }`}
+                    >
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={itemDia.ativo}
+                          onChange={() => handleToggleDia(dia.id)}
+                          className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                        />
+                        <span className="text-sm font-semibold text-slate-800 min-w-[110px]">
+                          {dia.label}
+                        </span>
+                      </label>
+
+                      {itemDia.ativo ? (
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-slate-500 font-medium">Das</span>
+                          <input
+                            type="time"
+                            value={itemDia.abertura}
+                            onChange={(e) => handleHorarioChange(dia.id, 'abertura', e.target.value)}
+                            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                          />
+                          <span className="text-slate-500 font-medium">às</span>
+                          <input
+                            type="time"
+                            value={itemDia.fecho}
+                            onChange={(e) => handleHorarioChange(dia.id, 'fecho', e.target.value)}
+                            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic font-medium px-2">
+                          Fechado / Não informado
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Latitude
-                </label>
-                <input
-                  type="text"
-                  name="latitude"
-                  value={formData.latitude || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-600 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Longitude
-                </label>
-                <input
-                  type="text"
-                  name="longitude"
-                  value={formData.longitude || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-600 transition-all"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Coordenadas Geográficas (Latitude e Longitude)
+              </label>
+              <input
+                type="text"
+                name="coordenadas"
+                value={formData.coordenadas || ''}
+                onChange={handleChange}
+                placeholder="Ex: -29.6288, -50.4533"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all font-mono"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Dica: Pode colar diretamente do Google Maps (ex: <code className="text-slate-600">-29.6288, -50.4533</code>).
+              </p>
             </div>
 
             {/* Gerenciamento de Galeria */}
@@ -406,7 +508,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 ))}
 
                 {novasImagensPreviews.map((url, index) => (
-                  <div key={`nova-${index}`} className="relative group aspect-square rounded-2xl overflow-hidden border border-blue-300 bg-blue-50">
+                  <div key={`nova-${index}`} className="relative group aspect-square rounded-2xl overflow-hidden border border-emerald-300 bg-emerald-50">
                     <img src={url} alt={`Nova Prévia ${index + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -420,7 +522,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
               </div>
 
               {/* Upload de novas imagens */}
-              <div className="border-2 border-dashed border-slate-200 hover:border-blue-500 rounded-2xl p-6 text-center bg-slate-50 transition-all relative group cursor-pointer">
+              <div className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-6 text-center bg-slate-50 transition-all relative group cursor-pointer">
                 <input
                   type="file"
                   accept="image/*"
@@ -430,7 +532,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
                 />
                 <div className="flex flex-col items-center gap-2">
-                  <div className="bg-white p-3 rounded-2xl shadow-xs text-blue-600">
+                  <div className="bg-white p-3 rounded-2xl shadow-xs text-emerald-600">
                     <UploadCloud size={24} />
                   </div>
                   <span className="text-sm font-semibold text-slate-700">
@@ -452,7 +554,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
               <button
                 type="submit"
                 disabled={salvando}
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium shadow-md shadow-blue-600/20 transition-all cursor-pointer disabled:opacity-70"
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium shadow-md shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-70"
               >
                 <Save size={16} />
                 <span>{salvando ? 'Salvando...' : 'Salvar Alterações'}</span>
