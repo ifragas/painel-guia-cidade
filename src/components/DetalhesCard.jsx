@@ -12,7 +12,11 @@ import {
   Save, 
   X, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  MessageCircle,
+  Share2,
+  Link as LinkIcon,
+  Plus
 } from 'lucide-react';
 
 const DIAS_SEMANA = [
@@ -28,16 +32,26 @@ const DIAS_SEMANA = [
 export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete }) {
   const [editando, setEditando] = useState(false);
   
-  // 🔹 Inicializa o formData garantindo que as coordenadas venham preenchidas corretamente
   const [formData, setFormData] = useState({
     ...item,
+    linkExterno: item.linkExterno || '',
     coordenadas: item.coordenadas || (item.latitude && item.longitude ? `${item.latitude}, ${item.longitude}` : '')
   });
   
-  // Estado para controlar a opção "Sempre Aberto"
+  const [whatsappList, setWhatsappList] = useState(() => {
+    if (Array.isArray(item.whatsapp)) return item.whatsapp;
+    if (typeof item.whatsapp === 'string' && item.whatsapp.trim()) return [item.whatsapp];
+    return [''];
+  });
+
+  const [redesSociais, setRedesSociais] = useState({
+    instagram: item.redesSociais?.instagram || '',
+    facebook: item.redesSociais?.facebook || '',
+    tiktok: item.redesSociais?.tiktok || ''
+  });
+
   const [sempreAberto, setSempreAberto] = useState(Boolean(item.sempreAberto));
   
-  // Inicializa o estado de horários para edição com base no que já vem do item (ou padrão vazio)
   const [horariosPorDia, setHorariosPorDia] = useState(() => {
     const initialHorarios = item.horarios && typeof item.horarios === 'object' ? item.horarios : {};
     return DIAS_SEMANA.reduce((acc, dia) => {
@@ -53,8 +67,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
   const [novasImagensPreviews, setNovasImagensPreviews] = useState([]);
   const [arquivosNovos, setArquivosNovos] = useState([]);
   const [salvando, setSalvando] = useState(false);
-
-  // Estado reativo para controlar instantaneamente a imagem do carrossel
   const [indiceImagem, setIndiceImagem] = useState(0);
 
   const rawImagens = editando ? formData.imagens : item.imagens;
@@ -80,6 +92,26 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRedesChange = (e) => {
+    setRedesSociais({ ...redesSociais, [e.target.name]: e.target.value });
+  };
+
+  const handleAddWhatsapp = () => {
+    setWhatsappList(prev => [...prev, '']);
+  };
+
+  const handleWhatsappChange = (index, value) => {
+    setWhatsappList(prev => {
+      const nova = [...prev];
+      nova[index] = value;
+      return nova;
+    });
+  };
+
+  const handleRemoveWhatsapp = (index) => {
+    setWhatsappList(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleToggleDia = (diaId) => {
@@ -134,9 +166,14 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
       dataForm.append('descricao', formData.descricao || '');
       dataForm.append('endereco', formData.endereco || '');
       dataForm.append('coordenadas', formData.coordenadas || '');
+      dataForm.append('linkExterno', formData.linkExterno || '');
       dataForm.append('sempreAberto', sempreAberto);
       
-      // Monta o objeto de horários ativos (somente se não for sempre aberto)
+      const whatsappFiltrado = whatsappList.map(w => w.trim()).filter(Boolean);
+      dataForm.append('whatsapp', JSON.stringify(whatsappFiltrado));
+
+      dataForm.append('redesSociais', JSON.stringify(redesSociais));
+      
       const horariosPayload = {};
       if (!sempreAberto) {
         Object.keys(horariosPorDia).forEach((dia) => {
@@ -201,10 +238,13 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
     }
   };
 
+  const listaWhatsVisualizacao = Array.isArray(item.whatsapp) 
+    ? item.whatsapp.filter(Boolean) 
+    : (typeof item.whatsapp === 'string' && item.whatsapp.trim() ? [item.whatsapp] : []);
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       
-      {/* Barra de Navegação Superior */}
       <div className="flex items-center justify-between">
         <button 
           onClick={onVoltar}
@@ -234,20 +274,17 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
         )}
       </div>
 
-      {/* Caixa Principal */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8">
         
         {!editando ? (
           <div className="space-y-6">
             
-            {/* Título */}
             <div className="border-b border-slate-100 pb-4">
               <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
                 {item.nome}
               </h2>
             </div>
 
-            {/* Carrossel de Imagens */}
             {imagens.length > 0 ? (
               <div className="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video max-h-[400px] flex items-center justify-center shadow-inner">
                 <img
@@ -273,7 +310,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                       <ChevronRight size={20} />
                     </button>
 
-                    {/* Indicadores */}
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-xs">
                       {imagens.map((_, index) => (
                         <span
@@ -294,7 +330,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
               </div>
             )}
 
-            {/* Informações Detalhadas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
@@ -306,7 +341,62 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 </span>
               </div>
 
-              {/* Horários de Funcionamento ou Sempre Aberto */}
+              {listaWhatsVisualizacao.length > 0 && (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+                    <MessageCircle size={14} className="text-emerald-600" /> WhatsApp
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {listaWhatsVisualizacao.map((num, i) => (
+                      <span key={i} className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-1 rounded-lg font-medium">
+                        {num}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+{/* Link Externo / Cardápio Digital */}
+{item?.linkExterno && item.linkExterno.trim() !== '' && (
+  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
+    <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+      <LinkIcon size={14} className="text-emerald-600" /> Link Externo / Cardápio Digital
+    </span>
+    <a 
+      href={item.linkExterno} 
+      target="_blank" 
+      rel="noreferrer" 
+      className="text-sm font-medium text-emerald-700 hover:underline break-all"
+    >
+      {item.linkExterno} ↗
+    </a>
+  </div>
+)}
+              {item.redesSociais && (item.redesSociais.instagram || item.redesSociais.facebook || item.redesSociais.tiktok) && (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1">
+                    <Share2 size={14} className="text-emerald-600" /> Redes Sociais
+                  </span>
+                  <div className="flex flex-wrap gap-3 text-xs font-medium">
+                    {item.redesSociais.instagram && (
+                      <a href={item.redesSociais.instagram} target="_blank" rel="noreferrer" className="text-pink-600 hover:underline bg-pink-50 px-3 py-1.5 rounded-xl border border-pink-100">
+                        Instagram ↗
+                      </a>
+                    )}
+                    {item.redesSociais.facebook && (
+                      <a href={item.redesSociais.facebook} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
+                        Facebook ↗
+                      </a>
+                    )}
+                    {item.redesSociais.tiktok && (
+                      <a href={item.redesSociais.tiktok} target="_blank" rel="noreferrer" className="text-slate-900 hover:underline bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                        TikTok ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
                 <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1">
                   <Clock size={14} className="text-emerald-600" /> Horário de Funcionamento
@@ -372,7 +462,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
           </div>
         ) : (
           
-          /* Formulário de Edição */
           <form onSubmit={handleSubmit} className="space-y-6">
             
             <div className="border-b border-slate-100 pb-4">
@@ -422,7 +511,105 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
               />
             </div>
 
-            {/* Gestor de Horários de Funcionamento & Opção Sempre Aberto */}
+            {/* Input do Link Externo na Edição */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+                <LinkIcon size={14} className="text-slate-400" />
+                Link Externo (Cardápio Digital / Site)
+              </label>
+              <input
+                type="url"
+                name="linkExterno"
+                value={formData.linkExterno || ''}
+                onChange={handleChange}
+                placeholder="Ex: https://cardapio.com/seurestaurante"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
+              />
+            </div>
+
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-700">
+                  <MessageCircle size={18} className="text-emerald-600" />
+                  <h4 className="text-sm font-bold">Números de WhatsApp</h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddWhatsapp}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Adicionar Número</span>
+                </button>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                {whatsappList.map((whats, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={whats}
+                      onChange={(e) => handleWhatsappChange(index, e.target.value)}
+                      placeholder="Ex: 51999999999"
+                      className="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+                    />
+                    {whatsappList.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveWhatsapp(index)}
+                        className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer border border-slate-200 bg-white"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 text-slate-700">
+                <Share2 size={18} className="text-emerald-600" />
+                <h4 className="text-sm font-bold">Redes Sociais</h4>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Instagram (URL)</label>
+                  <input
+                    type="url"
+                    name="instagram"
+                    value={redesSociais.instagram}
+                    onChange={handleRedesChange}
+                    placeholder="https://instagram.com/..."
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Facebook (URL)</label>
+                  <input
+                    type="url"
+                    name="facebook"
+                    value={redesSociais.facebook}
+                    onChange={handleRedesChange}
+                    placeholder="https://facebook.com/..."
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">TikTok (URL)</label>
+                  <input
+                    type="url"
+                    name="tiktok"
+                    value={redesSociais.tiktok}
+                    onChange={handleRedesChange}
+                    placeholder="https://tiktok.com/@..."
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-slate-700">
@@ -432,7 +619,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                   </h4>
                 </div>
 
-                {/* Checkbox "Sempre Aberto" */}
                 <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
                   <input
                     type="checkbox"
@@ -518,12 +704,8 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 placeholder="Ex: -29.6288, -50.4533"
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all font-mono"
               />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Dica: Pode colar diretamente do Google Maps (ex: <code className="text-slate-600">-29.6288, -50.4533</code>).
-              </p>
             </div>
 
-            {/* Gerenciamento de Galeria */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">
                 Gerenciar Galeria de Imagens
@@ -557,7 +739,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 ))}
               </div>
 
-              {/* Upload de novas imagens */}
               <div className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-6 text-center bg-slate-50 transition-all relative group cursor-pointer">
                 <input
                   type="file"
@@ -578,7 +759,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
               </div>
             </div>
 
-            {/* Botões de Ação */}
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
               <button
                 type="button"

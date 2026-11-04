@@ -12,6 +12,9 @@ import {
   X,
   Plus,
   Trash2,
+  MessageCircle,
+  Share2,
+  Link as LinkIcon,
   Image as ImageIcon
 } from 'lucide-react';
 
@@ -32,7 +35,18 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     nome: '',
     descricao: '',
     endereco: '',
-    coordenadas: ''
+    coordenadas: '',
+    linkExterno: ''
+  });
+
+  // Estado para gerenciar múltiplos números de WhatsApp
+  const [whatsappList, setWhatsappList] = useState(['']);
+
+  // Estado para gerenciar links de redes sociais
+  const [redesSociais, setRedesSociais] = useState({
+    instagram: '',
+    facebook: '',
+    tiktok: ''
   });
 
   // Estado para controlar se o local é sempre aberto
@@ -64,6 +78,31 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  // Atualiza os campos de redes sociais
+  const handleRedesChange = (e) => {
+    setRedesSociais((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  // Funções para gerenciar lista de WhatsApp
+  const handleAddWhatsapp = () => {
+    setWhatsappList((prev) => [...prev, '']);
+  };
+
+  const handleWhatsappChange = (index, value) => {
+    setWhatsappList((prev) => {
+      const novaLista = [...prev];
+      novaLista[index] = value;
+      return novaLista;
+    });
+  };
+
+  const handleRemoveWhatsapp = (index) => {
+    setWhatsappList((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Alterna o dia ativo no gestor de horários
@@ -102,7 +141,15 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     formData.append('descricao', dados.descricao);
     formData.append('endereco', dados.endereco);
     formData.append('coordenadas', dados.coordenadas);
+    formData.append('linkExterno', dados.linkExterno);
     formData.append('sempreAberto', sempreAberto);
+
+    // Filtra números de WhatsApp válidos e envia como string JSON
+    const whatsappFiltrado = whatsappList.map(w => w.trim()).filter(Boolean);
+    formData.append('whatsapp', JSON.stringify(whatsappFiltrado));
+
+    // Envia redes sociais estruturadas como string JSON
+    formData.append('redesSociais', JSON.stringify(redesSociais));
 
     // Filtra apenas os dias ativos e envia o objeto de horários estruturado
     const horariosPayload = {};
@@ -131,9 +178,12 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
         nome: '',
         descricao: '',
         endereco: '',
-        coordenadas: ''
+        coordenadas: '',
+        linkExterno: ''
       });
 
+      setWhatsappList(['']);
+      setRedesSociais({ instagram: '', facebook: '', tiktok: '' });
       setSempreAberto(false);
       setHorariosPorDia(
         DIAS_SEMANA.reduce((acc, dia) => {
@@ -301,6 +351,114 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             placeholder="Ex: Localidade de Linha 5, Riozinho - RS"
             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
           />
+        </div>
+
+        {/* Link Externo (Cardápio / Site) */}
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+            <LinkIcon size={14} className="text-slate-400" />
+            Link Externo (Cardápio Digital / Site)
+          </label>
+
+          <input
+            type="url"
+            name="linkExterno"
+            value={dados.linkExterno}
+            onChange={handleChange}
+            placeholder="Ex: https://cardapio.com/seurestaurante ou https://site.com"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
+          />
+          <p className="text-[11px] text-slate-400 mt-1">
+            Opcional. Insira o link completo do cardápio digital, site oficial ou reserva.
+          </p>
+        </div>
+
+        {/* WhatsApp Múltiplo */}
+        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-slate-700">
+              <MessageCircle size={18} className="text-emerald-600" />
+              <h4 className="text-sm font-bold">Números de WhatsApp</h4>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddWhatsapp}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
+            >
+              <Plus size={14} />
+              <span>Adicionar Número</span>
+            </button>
+          </div>
+          <p className="text-xs text-slate-500">
+            Adicione um ou mais números com DDD (ex: 51999999999).
+          </p>
+
+          <div className="space-y-2 pt-1">
+            {whatsappList.map((whats, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={whats}
+                  onChange={(e) => handleWhatsappChange(index, e.target.value)}
+                  placeholder="Ex: 51999999999"
+                  className="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 transition-all"
+                />
+                {whatsappList.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveWhatsapp(index)}
+                    className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer border border-slate-200 bg-white"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Redes Sociais */}
+        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div className="flex items-center gap-2 text-slate-700">
+            <Share2 size={18} className="text-emerald-600" />
+            <h4 className="text-sm font-bold">Redes Sociais</h4>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Instagram (URL)</label>
+              <input
+                type="url"
+                name="instagram"
+                value={redesSociais.instagram}
+                onChange={handleRedesChange}
+                placeholder="https://instagram.com/..."
+                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Facebook (URL)</label>
+              <input
+                type="url"
+                name="facebook"
+                value={redesSociais.facebook}
+                onChange={handleRedesChange}
+                placeholder="https://facebook.com/..."
+                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">TikTok (URL)</label>
+              <input
+                type="url"
+                name="tiktok"
+                value={redesSociais.tiktok}
+                onChange={handleRedesChange}
+                placeholder="https://tiktok.com/@..."
+                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Gestor de Horários de Funcionamento & Opção Sempre Aberto */}
