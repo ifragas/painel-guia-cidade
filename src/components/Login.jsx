@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Compass,
@@ -8,8 +7,10 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext'; // 1. Importa o hook do contexto
 
-export default function Login({ onLogin }) {
+export default function Login() {
+  const { login } = useAuth(); // 2. Extrai a função login do contexto
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,10 +24,9 @@ export default function Login({ onLogin }) {
     try {
       const data = await api.post('/login', { email, password });
 
-      localStorage.setItem('admin_token', data.token);
-      localStorage.setItem('admin_email', data.email);
-
-      onLogin(data.email);
+      // Opcional: o próprio context já pode gerenciar o localStorage se preferir, 
+      // mas mantendo assim, chamamos a função global do context:
+      login(data.email, data.token);
     } catch (err) {
       setError(
         err.message || 'Erro de conexão. Verifique sua internet.'

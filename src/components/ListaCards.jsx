@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Inbox, MapPin, Clock } from 'lucide-react';
+import api from '../services/api'; // Importa o nosso serviço centralizado
 
 export default function ListaCards({ tipo, onEdit }) {
   const [itens, setItens] = useState([]);
@@ -7,15 +8,9 @@ export default function ListaCards({ tipo, onEdit }) {
 
   const buscarItens = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await fetch(`https://turismo-api-vv62.onrender.com/api/${tipo}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) throw new Error('Erro na API');
-      const data = await response.json();
+      setLoading(true);
+      // Utiliza o serviço unificado (ele já injeta a URL base e o token automaticamente)
+      const data = await api.get(`/${tipo}`);
       setItens(data);
     } catch (error) {
       alert('❌ Erro ao buscar itens: ' + error.message);
