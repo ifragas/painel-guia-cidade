@@ -1,11 +1,12 @@
 import React from 'react';
-import { MapPin, Utensils, Home, LogOut, Compass } from 'lucide-react';
+import { MapPin, Utensils, Home, LogOut, Compass, HeartPulse } from 'lucide-react';
 
 export default function Sidebar({ ativo, setAtivo, onLogout }) {
   const menuItems = [
     { id: 'pontos-turisticos', label: 'Pontos Turísticos', icon: MapPin },
     { id: 'restaurantes', label: 'Restaurantes', icon: Utensils },
     { id: 'acomodacoes', label: 'Acomodações', icon: Home },
+    { id: 'servicos', label: 'Serviços Essenciais', icon: HeartPulse },
   ];
 
   return (

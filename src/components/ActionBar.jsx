@@ -1,13 +1,22 @@
 
 import { Plus, List } from 'lucide-react';
 
+const TITULOS = {
+  'pontos-turisticos': 'Pontos Turísticos',
+  restaurantes: 'Restaurantes',
+  acomodacoes: 'Acomodações',
+  servicos: 'Serviços Essenciais'
+};
+
 export default function ActionBar({ tipo, aba, setAba }) {
+  const titulo = TITULOS[tipo] || tipo;
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-6">
       
       <div>
-        <h3 className="text-lg font-bold text-slate-800 capitalize">
-          {tipo.replace(/-/g, ' ')}
+        <h3 className="text-lg font-bold text-slate-800">
+          {titulo}
         </h3>
 
         <p className="text-sm text-slate-500">

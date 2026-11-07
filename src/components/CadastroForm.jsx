@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import { TIPOS_SERVICO } from '../constants/servicos';
 import {
   UploadCloud,
   MapPin,
@@ -52,6 +53,13 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
   // Estado para controlar se o local é sempre aberto
   const [sempreAberto, setSempreAberto] = useState(false);
 
+  // Campos exclusivos da categoria Serviços Essenciais
+  const [tipoServico, setTipoServico] = useState('');
+  const [funcionamento24h, setFuncionamento24h] = useState(false);
+  const [whatsappTexto, setWhatsappTexto] = useState('');
+
+  const isServico = tipo === 'servicos';
+
   // Estado para gerenciar os horários por dia da semana
   const [horariosPorDia, setHorariosPorDia] = useState(
     DIAS_SEMANA.reduce((acc, dia) => {
@@ -70,6 +78,9 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     if (tipoProp) {
       setTipo(tipoProp);
     }
+    setTipoServico('');
+    setFuncionamento24h(false);
+    setWhatsappTexto('');
   }, [tipoProp]);
 
   // Atualiza os campos do formulário.
@@ -140,30 +151,44 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     formData.append('nome', dados.nome);
     formData.append('descricao', dados.descricao);
     formData.append('endereco', dados.endereco);
-    formData.append('coordenadas', dados.coordenadas);
-    formData.append('linkExterno', dados.linkExterno);
-    formData.append('sempreAberto', sempreAberto);
 
-    // Filtra números de WhatsApp válidos e envia como string JSON
-    const whatsappFiltrado = whatsappList.map(w => w.trim()).filter(Boolean);
-    formData.append('whatsapp', JSON.stringify(whatsappFiltrado));
+    if (tipo === 'servicos') {
+      // A API de serviços rejeita campos de turismo e espera whatsapp como texto.
+      formData.append('tipoServico', tipoServico);
+      formData.append('funcionamento24h', funcionamento24h);
+      formData.append('whatsapp', whatsappTexto.trim());
 
-    // Envia redes sociais estruturadas como string JSON
-    formData.append('redesSociais', JSON.stringify(redesSociais));
+      const partes = (dados.coordenadas || '').split(',').map((parte) => parte.trim());
+      if (partes.length === 2 && partes[0] && partes[1]) {
+        formData.append('latitude', partes[0]);
+        formData.append('longitude', partes[1]);
+      }
+    } else {
+      formData.append('coordenadas', dados.coordenadas);
+      formData.append('linkExterno', dados.linkExterno);
+      formData.append('sempreAberto', sempreAberto);
 
-    // Filtra apenas os dias ativos e envia o objeto de horários estruturado
-    const horariosPayload = {};
-    if (!sempreAberto) {
-      Object.keys(horariosPorDia).forEach((dia) => {
-        if (horariosPorDia[dia].ativo) {
-          horariosPayload[dia] = {
-            abertura: horariosPorDia[dia].abertura,
-            fecho: horariosPorDia[dia].fecho
-          };
-        }
-      });
+      // Filtra números de WhatsApp válidos e envia como string JSON
+      const whatsappFiltrado = whatsappList.map(w => w.trim()).filter(Boolean);
+      formData.append('whatsapp', JSON.stringify(whatsappFiltrado));
+
+      // Envia redes sociais estruturadas como string JSON
+      formData.append('redesSociais', JSON.stringify(redesSociais));
+
+      // Filtra apenas os dias ativos e envia o objeto de horários estruturado
+      const horariosPayload = {};
+      if (!sempreAberto) {
+        Object.keys(horariosPorDia).forEach((dia) => {
+          if (horariosPorDia[dia].ativo) {
+            horariosPayload[dia] = {
+              abertura: horariosPorDia[dia].abertura,
+              fecho: horariosPorDia[dia].fecho
+            };
+          }
+        });
+      }
+      formData.append('horarios', JSON.stringify(horariosPayload));
     }
-    formData.append('horarios', JSON.stringify(horariosPayload));
 
     files.forEach((file) => {
       formData.append('imagens', file);
@@ -183,6 +208,9 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
       });
 
       setWhatsappList(['']);
+      setWhatsappTexto('');
+      setTipoServico('');
+      setFuncionamento24h(false);
       setRedesSociais({ instagram: '', facebook: '', tiktok: '' });
       setSempreAberto(false);
       setHorariosPorDia(
@@ -231,6 +259,9 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
 
       case 'acomodacoes':
         return 'Acomodação';
+
+      case 'servicos':
+        return 'Serviço Essencial';
 
       default:
         return 'Local';
@@ -331,7 +362,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             onChange={handleChange}
             rows="4"
             required
-            placeholder="Descreva as atratividades, diferenciais e informações úteis para os visitantes..."
+            placeholder={isServico
+              ? 'Descreva o atendimento, o que o serviço oferece e informações úteis...'
+              : 'Descreva as atratividades, diferenciais e informações úteis para os visitantes...'}
+            maxLength={isServico ? 1000 : undefined}
             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all resize-y"
           />
         </div>
@@ -353,7 +387,62 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
           />
         </div>
 
+        {isServico && (
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Tipo de Serviço *
+              </label>
+              <select
+                name="tipoServico"
+                value={tipoServico}
+                onChange={(e) => setTipoServico(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
+              >
+                <option value="">Selecione o tipo</option>
+                {TIPOS_SERVICO.map((opcao) => (
+                  <option key={opcao.id} value={opcao.id}>
+                    {opcao.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2.5 rounded-xl border border-slate-200 shadow-sm w-fit">
+              <input
+                type="checkbox"
+                checked={funcionamento24h}
+                onChange={(e) => setFuncionamento24h(e.target.checked)}
+                className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+              />
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">
+                Funciona 24 horas?
+              </span>
+            </label>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+                <MessageCircle size={14} className="text-slate-400" />
+                WhatsApp
+              </label>
+              <input
+                type="text"
+                name="whatsapp"
+                value={whatsappTexto}
+                onChange={(e) => setWhatsappTexto(e.target.value)}
+                placeholder="Ex: 51999999999"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Informe um único número, com DDD.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Link Externo (Cardápio / Site) */}
+        {!isServico && (
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
             <LinkIcon size={14} className="text-slate-400" />
@@ -372,8 +461,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             Opcional. Insira o link completo do cardápio digital, site oficial ou reserva.
           </p>
         </div>
+        )}
 
         {/* WhatsApp Múltiplo */}
+        {!isServico && (
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-slate-700">
@@ -416,8 +507,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             ))}
           </div>
         </div>
+        )}
 
         {/* Redes Sociais */}
+        {!isServico && (
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
           <div className="flex items-center gap-2 text-slate-700">
             <Share2 size={18} className="text-emerald-600" />
@@ -460,8 +553,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             </div>
           </div>
         </div>
+        )}
 
         {/* Gestor de Horários de Funcionamento & Opção Sempre Aberto */}
+        {!isServico && (
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-slate-700">
@@ -544,6 +639,7 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             </div>
           )}
         </div>
+        )}
 
         {/* Upload de imagens */}
         <div>

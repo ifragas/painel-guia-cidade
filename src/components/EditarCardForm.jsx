@@ -10,6 +10,7 @@ import {
   Clock
 } from 'lucide-react';
 import { api } from '../services/api';
+import { TIPOS_SERVICO, funcionamento24hAtivo } from '../constants/servicos';
 
 const DIAS_SEMANA = [
   { id: 'segunda', label: 'Segunda-feira' },
@@ -41,6 +42,12 @@ export default function EditarCardForm({ item, tipo, onCancel, onSuccess }) {
   });
 
   const [sempreAberto, setSempreAberto] = useState(Boolean(item.sempreAberto));
+  const isServico = tipo === 'servicos';
+  const [tipoServico, setTipoServico] = useState(item.tipoServico || '');
+  const [funcionamento24h, setFuncionamento24h] = useState(funcionamento24hAtivo(item.funcionamento24h));
+  const [whatsappTexto, setWhatsappTexto] = useState(
+    typeof item.whatsapp === 'string' ? item.whatsapp : ''
+  );
   
   const [horariosPorDia, setHorariosPorDia] = useState(() => {
     const initialHorarios = item.horarios && typeof item.horarios === 'object' ? item.horarios : {};

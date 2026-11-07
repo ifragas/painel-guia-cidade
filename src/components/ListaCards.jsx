@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Inbox, MapPin, Clock } from 'lucide-react';
 import api from '../services/api'; // Importa o nosso serviço centralizado
+import { funcionamento24hAtivo, metaTipoServico } from '../constants/servicos';
+
+const ROTULO_CATEGORIA = {
+  'pontos-turisticos': 'Ponto Turístico',
+  restaurantes: 'Restaurante',
+  acomodacoes: 'Acomodação',
+  servicos: 'Serviço Essencial'
+};
 
 export default function ListaCards({ tipo, onEdit }) {
   const [itens, setItens] = useState([]);
@@ -44,7 +52,12 @@ export default function ListaCards({ tipo, onEdit }) {
             <p className="text-xs text-slate-400 mt-1">Utilize o botão superior para adicionar novos registros.</p>
           </div>
         ) : (
-          itens.map(item => (
+          itens.map(item => {
+            const tipoServico = tipo === 'servicos' ? metaTipoServico(item.tipoServico) : null;
+            const aberto24h = funcionamento24hAtivo(item.funcionamento24h);
+            const IconeTipo = tipoServico?.Icon;
+
+            return (
             <div
               key={item.id}
               onClick={() => onEdit(item)}
@@ -61,8 +74,24 @@ export default function ListaCards({ tipo, onEdit }) {
                   }}
                 />
                 <div className="absolute top-3 right-3 bg-slate-900/70 backdrop-blur-md text-white text-xs font-medium px-2.5 py-1 rounded-lg">
-                  {tipo === 'pontos-turisticos' ? 'Ponto Turístico' : tipo === 'restaurantes' ? 'Restaurante' : 'Acomodação'}
+                  {ROTULO_CATEGORIA[tipo] || 'Local'}
                 </div>
+                {tipo === 'servicos' && (
+                  <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
+                    <div className="inline-flex items-center gap-1 bg-white/95 text-slate-800 text-[11px] font-semibold px-2 py-1 rounded-lg shadow-sm">
+                      {IconeTipo && <IconeTipo size={13} className="text-emerald-700 shrink-0" />}
+                      <span>{tipoServico?.label || 'Serviço'}</span>
+                    </div>
+                    <div className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg shadow-sm ${
+                      aberto24h
+                        ? 'bg-amber-400 text-amber-950'
+                        : 'bg-white/95 text-slate-600'
+                    }`}>
+                      <Clock size={12} />
+                      <span>{aberto24h ? '24h' : 'Horário regular'}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Conteúdo do Card */}
@@ -93,7 +122,8 @@ export default function ListaCards({ tipo, onEdit }) {
                 </div>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

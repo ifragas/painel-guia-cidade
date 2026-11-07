@@ -1,7 +1,16 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 
+const TITULOS = {
+  'pontos-turisticos': 'Pontos Turísticos',
+  restaurantes: 'Restaurantes',
+  acomodacoes: 'Acomodações',
+  servicos: 'Serviços Essenciais'
+};
+
 export default function Layout({ ativo, setAtivo, onLogout, userEmail, children }) {
+  const titulo = TITULOS[ativo] || ativo;
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Sidebar Lateral */}
@@ -13,7 +22,7 @@ export default function Layout({ ativo, setAtivo, onLogout, userEmail, children 
         <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10 shadow-xs">
           <div>
             <h2 className="text-xl font-bold text-slate-800 capitalize">
-              Gerenciamento de {ativo.replace('-', ' ')}
+              Gerenciamento de {titulo}
             </h2>
             <p className="text-xs text-slate-500">Painel Administrativo - Secretaria de Turismo</p>
           </div>
