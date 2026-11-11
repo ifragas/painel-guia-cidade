@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Utensils, Home, LogOut, Compass, HeartPulse } from 'lucide-react';
+import { MapPin, Utensils, Home, LogOut, Compass, HeartPulse, Calendar } from 'lucide-react';
 
 export default function Sidebar({ ativo, setAtivo, onLogout }) {
   const menuItems = [
@@ -7,6 +7,7 @@ export default function Sidebar({ ativo, setAtivo, onLogout }) {
     { id: 'restaurantes', label: 'Restaurantes', icon: Utensils },
     { id: 'acomodacoes', label: 'Acomodações', icon: Home },
     { id: 'servicos', label: 'Serviços Essenciais', icon: HeartPulse },
+    { id: 'eventos', label: 'Eventos', icon: Calendar },
   ];
 
   return (
@@ -20,7 +21,7 @@ export default function Sidebar({ ativo, setAtivo, onLogout }) {
           </div>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
             <h1 className="font-bold text-white text-base tracking-wide">Guia da Cidade</h1>
-            <p className="text-xs text-emerald-300 font-medium">Turismo Riozinho</p>
+            <p className="text-xs text-emerald-300 font-medium">Turismo Rolante</p>
           </div>
         </div>
 

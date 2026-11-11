@@ -4,6 +4,7 @@ import ActionBar from '../components/ActionBar';
 import CadastroForm from '../components/CadastroForm';
 import ListaCards from '../components/ListaCards';
 import DetalhesCard from '../components/DetalhesCard';
+import EventosScreen from '../components/EventosScreen';
 import { useAuth } from '../context/AuthContext';
 
 export default function DashboardScreen() {
@@ -40,6 +41,8 @@ export default function DashboardScreen() {
     setAba('lista');
   };
 
+  const ehEventos = tipo === 'eventos';
+
   return (
     <Layout
       ativo={tipo}
@@ -47,33 +50,39 @@ export default function DashboardScreen() {
       onLogout={logout}
       userEmail={user?.email}
     >
-      {!itemSelecionado && (
-        <ActionBar tipo={tipo} aba={aba} setAba={setAba} />
-      )}
-
-      {itemSelecionado ? (
-        <DetalhesCard
-          key={`${tipo}-${itemSelecionado.id}`}
-          item={itemSelecionado}
-          tipo={tipo}
-          onVoltar={handleVoltar}
-          onEdit={handleAtualizarItem}
-          onDelete={handleDelete}
-        />
-      ) : aba === 'cadastro' ? (
-        <CadastroForm
-          tipo={tipo}
-          onSucesso={() => {
-            setAba('lista');
-            setVersaoLista((versao) => versao + 1);
-          }}
-        />
+      {ehEventos ? (
+        <EventosScreen key="eventos" />
       ) : (
-        <ListaCards
-          key={`${tipo}-${versaoLista}`}
-          tipo={tipo}
-          onEdit={handleEdit}
-        />
+        <>
+          {!itemSelecionado && (
+            <ActionBar tipo={tipo} aba={aba} setAba={setAba} />
+          )}
+
+          {itemSelecionado ? (
+            <DetalhesCard
+              key={`${tipo}-${itemSelecionado.id}`}
+              item={itemSelecionado}
+              tipo={tipo}
+              onVoltar={handleVoltar}
+              onEdit={handleAtualizarItem}
+              onDelete={handleDelete}
+            />
+          ) : aba === 'cadastro' ? (
+            <CadastroForm
+              tipo={tipo}
+              onSucesso={() => {
+                setAba('lista');
+                setVersaoLista((versao) => versao + 1);
+              }}
+            />
+          ) : (
+            <ListaCards
+              key={`${tipo}-${versaoLista}`}
+              tipo={tipo}
+              onEdit={handleEdit}
+            />
+          )}
+        </>
       )}
     </Layout>
   );
