@@ -1,6 +1,8 @@
+// src/components/DetalhesCard.jsx
 import { useState } from 'react';
 import { api } from '../services/api';
 import EditarCardForm from './EditarCardForm';
+import EditarServicoForm from './EditarServicoForm';
 import { 
   ArrowLeft, 
   Edit3, 
@@ -13,7 +15,8 @@ import {
   ChevronRight,
   MessageCircle,
   Share2,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Phone // ✅ Ícone do telefone adicionado
 } from 'lucide-react';
 
 const DIAS_SEMANA = [
@@ -166,6 +169,18 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 </span>
               </div>
 
+              {/* ✅ EXIBIÇÃO DO TELEFONE FIXO */}
+              {item.telefone && item.telefone.trim() !== '' && (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+                    <Phone size={14} className="text-emerald-600" /> Telefone Fixo
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800">
+                    {item.telefone}
+                  </span>
+                </div>
+              )}
+
               {listaWhatsVisualizacao.length > 0 && (
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
@@ -184,7 +199,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
               {item?.linkExterno && item.linkExterno.trim() !== '' && (
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
                   <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
-                    <LinkIcon size={14} className="text-emerald-600" /> Link Externo / Cardápio Digital
+                    <LinkIcon size={14} className="text-emerald-600" /> Link Externo / Site Institucional
                   </span>
                   <a 
                     href={item.linkExterno} 
@@ -227,9 +242,9 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                   <Clock size={14} className="text-emerald-600" /> Horário de Funcionamento
                 </span>
                 
-                {item.sempreAberto ? (
+                {item.funcionamento24h || item.sempreAberto ? (
                   <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-xl text-xs font-bold">
-                    <span>● Sempre Aberto (Acesso Livre)</span>
+                    <span>● Sempre Aberto (24 Horas)</span>
                   </div>
                 ) : item.horarios && typeof item.horarios === 'object' && Object.keys(item.horarios).length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
@@ -246,7 +261,7 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                   </div>
                 ) : (
                   <span className="text-sm font-medium text-slate-600">
-                    {typeof item.horarios === 'string' ? item.horarios : (item.horario || 'Não informado')}
+                    {item.horario || 'Não informado'}
                   </span>
                 )}
               </div>
@@ -262,15 +277,6 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 </div>
               )}
 
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
-                <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
-                  <FileText size={14} /> Descrição Completa
-                </span>
-                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line mt-1">
-                  {item.descricao}
-                </p>
-              </div>
-
               {item.coordenadas && (
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
                   <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
@@ -282,19 +288,40 @@ export default function DetalhesCard({ item, tipo, onVoltar, onEdit, onDelete })
                 </div>
               )}
 
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 md:col-span-2">
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+                  <FileText size={14} /> Descrição Completa
+                </span>
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line mt-1">
+                  {item.descricao}
+                </p>
+              </div>
+
             </div>
 
           </div>
         ) : (
-          <EditarCardForm 
-            item={item}
-            tipo={tipo}
-            onCancel={() => setEditando(false)}
-            onSuccess={(updatedItem) => {
-              setEditando(false);
-              onEdit(updatedItem);
-            }}
-          />
+          tipo === 'servicos' ? (
+            <EditarServicoForm 
+              item={item}
+              tipo={tipo}
+              onCancel={() => setEditando(false)}
+              onSuccess={(updatedItem) => {
+                setEditando(false);
+                onEdit(updatedItem);
+              }}
+            />
+          ) : (
+            <EditarCardForm 
+              item={item}
+              tipo={tipo}
+              onCancel={() => setEditando(false)}
+              onSuccess={(updatedItem) => {
+                setEditando(false);
+                onEdit(updatedItem);
+              }}
+            />
+          )
         )}
 
       </div>
