@@ -37,7 +37,8 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     descricao: '',
     endereco: '',
     coordenadas: '',
-    linkExterno: ''
+    linkExterno: '',
+    telefone: '' // ✅ 1. ADICIONADO: Telefone Fixo no estado inicial
   });
 
   // Estado para gerenciar múltiplos números de WhatsApp
@@ -166,6 +167,7 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     } else {
       formData.append('coordenadas', dados.coordenadas);
       formData.append('linkExterno', dados.linkExterno);
+      formData.append('telefone', dados.telefone); // ✅ 2. ADICIONADO: Envio do telefone para a API
       formData.append('sempreAberto', sempreAberto);
 
       // Filtra números de WhatsApp válidos e envia como string JSON
@@ -204,7 +206,8 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
         descricao: '',
         endereco: '',
         coordenadas: '',
-        linkExterno: ''
+        linkExterno: '',
+        telefone: '' // ✅ 3. ADICIONADO: Limpeza do campo telefone após sucesso
       });
 
       setWhatsappList(['']);
@@ -253,16 +256,12 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
     switch (tipo) {
       case 'pontos-turisticos':
         return 'Ponto Turístico';
-
       case 'restaurantes':
         return 'Restaurante';
-
       case 'acomodacoes':
         return 'Acomodação';
-
       case 'servicos':
         return 'Serviço Essencial';
-
       default:
         return 'Local';
     }
@@ -277,7 +276,6 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
           <h2 className="text-xl font-bold text-slate-800 tracking-tight">
             Cadastrar Novo Local
           </h2>
-
           <p className="text-slate-500 text-sm mt-0.5">
             Preencha as informações para adicionar um novo registro.
           </p>
@@ -293,19 +291,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
       {/* Alerta de sucesso */}
       {sucesso && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-2xl mb-6 flex items-center gap-3">
-          <CheckCircle2
-            className="text-emerald-600 shrink-0"
-            size={20}
-          />
-
+          <CheckCircle2 className="text-emerald-600 shrink-0" size={20} />
           <div>
-            <p className="font-semibold">
-              Cadastro realizado com sucesso!
-            </p>
-
-            <p className="text-xs text-emerald-700">
-              Redirecionando para a listagem...
-            </p>
+            <p className="font-semibold">Cadastro realizado com sucesso!</p>
+            <p className="text-xs text-emerald-700">Redirecionando para a listagem...</p>
           </div>
         </div>
       )}
@@ -313,19 +302,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
       {/* Alerta de erro */}
       {erro && (
         <div className="bg-rose-50 border border-rose-200 text-rose-800 text-sm px-4 py-3 rounded-2xl mb-6 flex items-center gap-3">
-          <X
-            className="text-rose-600 shrink-0"
-            size={20}
-          />
-
+          <X className="text-rose-600 shrink-0" size={20} />
           <div>
-            <p className="font-semibold">
-              Erro ao salvar cadastro
-            </p>
-
-            <p className="text-xs text-rose-700">
-              {erro}
-            </p>
+            <p className="font-semibold">Erro ao salvar cadastro</p>
+            <p className="text-xs text-rose-700">{erro}</p>
           </div>
         </div>
       )}
@@ -337,7 +317,6 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
             Nome do Local *
           </label>
-
           <input
             type="text"
             name="nome"
@@ -355,7 +334,6 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             <FileText size={14} className="text-slate-400" />
             Descrição Completa *
           </label>
-
           <textarea
             name="descricao"
             value={dados.descricao}
@@ -376,7 +354,6 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             <MapPin size={14} className="text-slate-400" />
             Endereço
           </label>
-
           <input
             type="text"
             name="endereco"
@@ -443,202 +420,222 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
 
         {/* Link Externo (Cardápio / Site) */}
         {!isServico && (
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
-            <LinkIcon size={14} className="text-slate-400" />
-            Link Externo (Cardápio Digital / Site)
-          </label>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+              <LinkIcon size={14} className="text-slate-400" />
+              Link Externo (Cardápio Digital / Site)
+            </label>
+            <input
+              type="url"
+              name="linkExterno"
+              value={dados.linkExterno}
+              onChange={handleChange}
+              placeholder="Ex: https://cardapio.com/seurestaurante ou https://site.com"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
+            />
+            <p className="text-[11px] text-slate-400 mt-1">
+              Opcional. Insira o link completo do cardápio digital, site oficial ou reserva.
+            </p>
+          </div>
+        )}
 
-          <input
-            type="url"
-            name="linkExterno"
-            value={dados.linkExterno}
-            onChange={handleChange}
-            placeholder="Ex: https://cardapio.com/seurestaurante ou https://site.com"
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
-          />
-          <p className="text-[11px] text-slate-400 mt-1">
-            Opcional. Insira o link completo do cardápio digital, site oficial ou reserva.
-          </p>
-        </div>
+        {/* ✅ 4. ADICIONADO: Campo visual de Telefone Fixo */}
+        {!isServico && (
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+              <MessageCircle size={14} className="text-slate-400" />
+              Telefone Fixo
+            </label>
+            <input
+              type="text"
+              name="telefone"
+              value={dados.telefone}
+              onChange={handleChange}
+              placeholder="Ex: 5135430000"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all"
+            />
+            <p className="text-[11px] text-slate-400 mt-1">
+              Opcional. Número para contato direto (ligação).
+            </p>
+          </div>
         )}
 
         {/* WhatsApp Múltiplo */}
         {!isServico && (
-        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-slate-700">
-              <MessageCircle size={18} className="text-emerald-600" />
-              <h4 className="text-sm font-bold">Números de WhatsApp</h4>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddWhatsapp}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
-            >
-              <Plus size={14} />
-              <span>Adicionar Número</span>
-            </button>
-          </div>
-          <p className="text-xs text-slate-500">
-            Adicione um ou mais números com DDD (ex: 51999999999).
-          </p>
-
-          <div className="space-y-2 pt-1">
-            {whatsappList.map((whats, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={whats}
-                  onChange={(e) => handleWhatsappChange(index, e.target.value)}
-                  placeholder="Ex: 51999999999"
-                  className="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 transition-all"
-                />
-                {whatsappList.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveWhatsapp(index)}
-                    className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer border border-slate-200 bg-white"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-700">
+                <MessageCircle size={18} className="text-emerald-600" />
+                <h4 className="text-sm font-bold">Números de WhatsApp</h4>
               </div>
-            ))}
+              <button
+                type="button"
+                onClick={handleAddWhatsapp}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
+              >
+                <Plus size={14} />
+                <span>Adicionar Número</span>
+              </button>
+            </div>
+            <p className="text-xs text-slate-500">
+              Adicione um ou mais números com DDD (ex: 51999999999).
+            </p>
+
+            <div className="space-y-2 pt-1">
+              {whatsappList.map((whats, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={whats}
+                    onChange={(e) => handleWhatsappChange(index, e.target.value)}
+                    placeholder="Ex: 51999999999"
+                    className="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 transition-all"
+                  />
+                  {whatsappList.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveWhatsapp(index)}
+                      className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer border border-slate-200 bg-white"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
         )}
 
         {/* Redes Sociais */}
         {!isServico && (
-        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-          <div className="flex items-center gap-2 text-slate-700">
-            <Share2 size={18} className="text-emerald-600" />
-            <h4 className="text-sm font-bold">Redes Sociais</h4>
-          </div>
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-2 text-slate-700">
+              <Share2 size={18} className="text-emerald-600" />
+              <h4 className="text-sm font-bold">Redes Sociais</h4>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Instagram (URL)</label>
-              <input
-                type="url"
-                name="instagram"
-                value={redesSociais.instagram}
-                onChange={handleRedesChange}
-                placeholder="https://instagram.com/..."
-                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Facebook (URL)</label>
-              <input
-                type="url"
-                name="facebook"
-                value={redesSociais.facebook}
-                onChange={handleRedesChange}
-                placeholder="https://facebook.com/..."
-                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">TikTok (URL)</label>
-              <input
-                type="url"
-                name="tiktok"
-                value={redesSociais.tiktok}
-                onChange={handleRedesChange}
-                placeholder="https://tiktok.com/@..."
-                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Instagram (URL)</label>
+                <input
+                  type="url"
+                  name="instagram"
+                  value={redesSociais.instagram}
+                  onChange={handleRedesChange}
+                  placeholder="https://instagram.com/..."
+                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Facebook (URL)</label>
+                <input
+                  type="url"
+                  name="facebook"
+                  value={redesSociais.facebook}
+                  onChange={handleRedesChange}
+                  placeholder="https://facebook.com/..."
+                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">TikTok (URL)</label>
+                <input
+                  type="url"
+                  name="tiktok"
+                  value={redesSociais.tiktok}
+                  onChange={handleRedesChange}
+                  placeholder="https://tiktok.com/@..."
+                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
+                />
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         {/* Gestor de Horários de Funcionamento & Opção Sempre Aberto */}
         {!isServico && (
-        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-slate-700">
-              <Clock size={18} className="text-emerald-600" />
-              <h4 className="text-sm font-bold">
-                Horário de Funcionamento
-              </h4>
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-700">
+                <Clock size={18} className="text-emerald-600" />
+                <h4 className="text-sm font-bold">
+                  Horário de Funcionamento
+                </h4>
+              </div>
+
+              {/* Checkbox "Sempre Aberto" */}
+              <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+                <input
+                  type="checkbox"
+                  checked={sempreAberto}
+                  onChange={(e) => setSempreAberto(e.target.checked)}
+                  className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                />
+                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">
+                  Sempre Aberto
+                </span>
+              </label>
             </div>
 
-            {/* Checkbox "Sempre Aberto" */}
-            <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-              <input
-                type="checkbox"
-                checked={sempreAberto}
-                onChange={(e) => setSempreAberto(e.target.checked)}
-                className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
-              />
-              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">
-                Sempre Aberto
-              </span>
-            </label>
+            <p className="text-xs text-slate-500">
+              {sempreAberto
+                ? 'Local configurado como sempre aberto (acesso livre sem restrição de horários).'
+                : 'Ative os dias em que o local funciona e configure o intervalo de atendimento.'}
+            </p>
+
+            {!sempreAberto && (
+              <div className="space-y-3 pt-2">
+                {DIAS_SEMANA.map((dia) => {
+                  const item = horariosPorDia[dia.id];
+                  return (
+                    <div
+                      key={dia.id}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3 ${
+                        item.ativo
+                          ? 'bg-white border-emerald-200 shadow-sm'
+                          : 'bg-slate-100/60 border-slate-200/60 opacity-70'
+                      }`}
+                    >
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={item.ativo}
+                          onChange={() => handleToggleDia(dia.id)}
+                          className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                        />
+                        <span className="text-sm font-semibold text-slate-800 min-w-[110px]">
+                          {dia.label}
+                        </span>
+                      </label>
+
+                      {item.ativo ? (
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-slate-500 font-medium">Das</span>
+                          <input
+                            type="time"
+                            value={item.abertura}
+                            onChange={(e) => handleHorarioChange(dia.id, 'abertura', e.target.value)}
+                            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                          />
+                          <span className="text-slate-500 font-medium">às</span>
+                          <input
+                            type="time"
+                            value={item.fecho}
+                            onChange={(e) => handleHorarioChange(dia.id, 'fecho', e.target.value)}
+                            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic font-medium px-2">
+                          Fechado / Não informado
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-
-          <p className="text-xs text-slate-500">
-            {sempreAberto
-              ? 'Local configurado como sempre aberto (acesso livre sem restrição de horários).'
-              : 'Ative os dias em que o local funciona e configure o intervalo de atendimento.'}
-          </p>
-
-          {!sempreAberto && (
-            <div className="space-y-3 pt-2">
-              {DIAS_SEMANA.map((dia) => {
-                const item = horariosPorDia[dia.id];
-                return (
-                  <div
-                    key={dia.id}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3 ${
-                      item.ativo
-                        ? 'bg-white border-emerald-200 shadow-sm'
-                        : 'bg-slate-100/60 border-slate-200/60 opacity-70'
-                    }`}
-                  >
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={item.ativo}
-                        onChange={() => handleToggleDia(dia.id)}
-                        className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
-                      />
-                      <span className="text-sm font-semibold text-slate-800 min-w-[110px]">
-                        {dia.label}
-                      </span>
-                    </label>
-
-                    {item.ativo ? (
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="text-slate-500 font-medium">Das</span>
-                        <input
-                          type="time"
-                          value={item.abertura}
-                          onChange={(e) => handleHorarioChange(dia.id, 'abertura', e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
-                        />
-                        <span className="text-slate-500 font-medium">às</span>
-                        <input
-                          type="time"
-                          value={item.fecho}
-                          onChange={(e) => handleHorarioChange(dia.id, 'fecho', e.target.value)}
-                          className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-600"
-                        />
-                      </div>
-                    ) : (
-                      <span className="text-xs text-slate-400 italic font-medium px-2">
-                        Fechado / Não informado
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
         )}
 
         {/* Upload de imagens */}
@@ -648,19 +645,13 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
           </label>
 
           <div className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-6 text-center bg-slate-50 hover:bg-emerald-50/30 transition-all cursor-pointer relative group">
-
             <input
               type="file"
               accept="image/*"
               multiple
               onChange={(e) => {
                 const selecionadas = Array.from(e.target.files || []);
-
-                setFiles((prev) => [
-                  ...prev,
-                  ...selecionadas
-                ]);
-
+                setFiles((prev) => [...prev, ...selecionadas]);
                 e.target.value = '';
               }}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
@@ -675,7 +666,6 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
                 <p className="text-sm font-semibold text-slate-700">
                   Clique ou arraste imagens aqui
                 </p>
-
                 <p className="text-xs text-slate-400 mt-0.5">
                   PNG, JPG ou JPEG — máximo recomendado de 10 MB por arquivo
                 </p>
@@ -688,9 +678,7 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             <div className="mt-4 space-y-2">
               <p className="text-xs font-bold uppercase text-slate-500">
                 {files.length}{' '}
-                {files.length === 1
-                  ? 'imagem selecionada'
-                  : 'imagens selecionadas'}
+                {files.length === 1 ? 'imagem selecionada' : 'imagens selecionadas'}
               </p>
 
               <div className="flex flex-wrap gap-2">
@@ -699,15 +687,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
                     key={`${file.name}-${file.size}-${idx}`}
                     className="flex items-center gap-2 bg-slate-100 border border-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-xl"
                   >
-                    <ImageIcon
-                      size={14}
-                      className="text-slate-400 shrink-0"
-                    />
-
+                    <ImageIcon size={14} className="text-slate-400 shrink-0" />
                     <span className="truncate max-w-[180px] font-medium">
                       {file.name}
                     </span>
-
                     <button
                       type="button"
                       onClick={() => handleRemoveFile(idx)}
@@ -725,10 +708,8 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
 
         {/* Coordenadas geográficas unificadas */}
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-3">
-
           <div className="flex items-center gap-2 text-slate-700">
             <Globe size={18} className="text-emerald-600" />
-
             <h4 className="text-sm font-bold">
               Localização no Mapa (Coordenadas)
             </h4>
@@ -738,7 +719,6 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             <label className="block text-xs font-semibold text-slate-600 mb-1">
               Latitude e Longitude (Separadas por vírgula)
             </label>
-
             <input
               type="text"
               name="coordenadas"
@@ -748,10 +728,10 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
               className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all"
             />
             <p className="text-[11px] text-slate-400 mt-1">
-              Dica: Pode copiar diretamente do Google Maps (ex: <code className="text-slate-600">-29.6288, -50.4533</code>).
+              Dica: Pode copiar diretamente do Google Maps (ex:{' '}
+              <code className="text-slate-600">-29.6288, -50.4533</code>).
             </p>
           </div>
-
         </div>
 
         {/* Botão de envio */}
@@ -771,7 +751,6 @@ export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
             )}
           </button>
         </div>
-
       </form>
     </div>
   );
