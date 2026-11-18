@@ -8,7 +8,7 @@ Desenvolvido com **React**, **Vite** e **Tailwind CSS**, este painel conecta-se 
 
 ## 🚀 Demonstração & Links
 
-* **Aplicação Web (Vercel):** `https://painel-guia-cidade.vercel.app` 
+* **Aplicação Web (Vercel):** `https://guiadacidade.vercel.app` 
 * **API REST (Render):** `https://turismo-api-vv62.onrender.com/api`
 
 ---
