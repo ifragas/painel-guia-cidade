@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { TIPOS_SERVICO } from '../constants/servicos';
-import { getCidadeIdDoUsuario } from '../utils/getUserCity';
+import { getUserInfo } from '../utils/getUserInfo'; // 🚨 Atualizado para pegar role e cidadeId
 
 import {
   UploadCloud,
@@ -31,9 +31,11 @@ const DIAS_SEMANA = [
   { id: 'domingo', label: 'Domingo' }
 ];
 
-// 🚨 ALTERAÇÃO PROFISSIONAL: Adicionamos 'cidadeId' às props, com fallback seguro para o MVP
-export default function CadastroForm({ tipo: tipoProp, cidadeId = 'rolante', onSucesso }) {
+export default function CadastroForm({ tipo: tipoProp, onSucesso }) {
   const [tipo, setTipo] = useState(tipoProp || 'pontos-turisticos');
+  
+  // 🚨 NOVO: Extrair role e cidadeId do token decodificado
+  const { role: userRole, cidadeId: userCidadeId } = getUserInfo();
 
   const [dados, setDados] = useState({
     nome: '',
@@ -69,6 +71,10 @@ export default function CadastroForm({ tipo: tipoProp, cidadeId = 'rolante', onS
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState('');
 
+  // 🚨 NOVO: Estados para seleção de cidade (apenas para super_admin)
+  const [cidadesDisponiveis, setCidadesDisponiveis] = useState([]);
+  const [cidadeSelecionada, setCidadeSelecionada] = useState(userCidadeId || '');
+
   useEffect(() => {
     if (tipoProp) {
       setTipo(tipoProp);
@@ -77,6 +83,20 @@ export default function CadastroForm({ tipo: tipoProp, cidadeId = 'rolante', onS
     setFuncionamento24h(false);
     setWhatsappTexto('');
   }, [tipoProp]);
+
+  // 🚨 NOVO: Carregar cidades se for super_admin
+  useEffect(() => {
+    if (userRole === 'super_admin') {
+      api.get('/admin/cidades').then(res => {
+        setCidadesDisponiveis(res);
+        if (res.length > 0 && !cidadeSelecionada) {
+          setCidadeSelecionada(res[0].slug);
+        }
+      }).catch(() => {
+        setErro('Erro ao carregar lista de cidades.');
+      });
+    }
+  }, [userRole]);
 
   const handleChange = (e) => {
     setDados((prev) => ({
@@ -135,14 +155,19 @@ export default function CadastroForm({ tipo: tipoProp, cidadeId = 'rolante', onS
     setSucesso(false);
     setErro('');
 
+    // 🚨 CORREÇÃO: Definir o cidadeId correto uma única vez
+    const cidadeIdParaSalvar = userRole === 'super_admin' ? cidadeSelecionada : userCidadeId;
+
+    if (!cidadeIdParaSalvar) {
+      setErro('Erro: Nenhuma cidade foi identificada ou selecionada.');
+      setUploading(false);
+      return;
+    }
+
     const formData = new FormData();
-
-    const cidadeIdLimpo = String(getCidadeIdDoUsuario()).toLowerCase().trim();
-    formData.append('cidadeId', cidadeIdLimpo);
-
-    // 🚨 ALTERAÇÃO CRUCIAL: Injetamos o cidadeId no FormData.
-    // O middleware do backend (requireRole) vai ler isso para validar a permissão.
-    formData.append('cidadeId', cidadeId);
+    
+    // 🚨 CORREÇÃO CRÍTICA: Apenas UM append de cidadeId, normalizado
+    formData.append('cidadeId', String(cidadeIdParaSalvar).toLowerCase().trim());
 
     formData.append('nome', dados.nome);
     formData.append('descricao', dados.descricao);
@@ -188,7 +213,6 @@ export default function CadastroForm({ tipo: tipoProp, cidadeId = 'rolante', onS
     });
 
     try {
-      // A rota será algo como: POST /pontos-turisticos
       await api.post(`/${tipo}`, formData);
 
       setSucesso(true);
@@ -274,6 +298,32 @@ export default function CadastroForm({ tipo: tipoProp, cidadeId = 'rolante', onS
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        
+        {/* 🚨 NOVO: Seletor de Cidade apenas para Super Admin */}
+        {userRole === 'super_admin' && (
+          <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 mb-4">
+            <label className="block text-xs font-bold uppercase tracking-wider text-amber-800 mb-2">
+              🌍 Criando como Super Admin: Selecione a Cidade de Destino *
+            </label>
+            <select
+              value={cidadeSelecionada}
+              onChange={(e) => setCidadeSelecionada(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white border border-amber-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+            >
+              <option value="">Selecione uma cidade...</option>
+              {cidadesDisponiveis.map(cidade => (
+                <option key={cidade.slug} value={cidade.slug}>
+                  {cidade.nome} ({cidade.estado})
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-amber-700 mt-1.5">
+              O item ficará vinculado exclusivamente a esta cidade e só será visível para o administrador dela.
+            </p>
+          </div>
+        )}
+
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Nome do Local *</label>
           <input type="text" name="nome" value={dados.nome} onChange={handleChange} required placeholder="Ex: Cascata do Chuvisqueiro" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:bg-white transition-all" />

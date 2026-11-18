@@ -1,15 +1,10 @@
 // src/utils/getUserInfo.js
-
 export function getUserInfo() {
   const token = localStorage.getItem('admin_token');
   
-  // Fallback seguro caso o token não exista ou seja inválido
-  const fallback = { role: 'city_admin', cidadeId: 'rolante' };
-
-  if (!token) return fallback;
+  if (!token) return { role: 'city_admin', cidadeId: null };
 
   try {
-    // Decodifica o payload do JWT (parte do meio do token)
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
@@ -23,10 +18,10 @@ export function getUserInfo() {
     
     return {
       role: payload.role || 'city_admin',
-      cidadeId: payload.cidadeId || 'rolante'
+      cidadeId: payload.cidadeId || null // 🔒 SEM FALLBACK HARDCODED
     };
   } catch (error) {
     console.error('Erro ao decodificar token:', error);
-    return fallback;
+    return { role: 'city_admin', cidadeId: null };
   }
 }

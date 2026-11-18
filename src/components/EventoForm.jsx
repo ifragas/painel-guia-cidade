@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getCidadeIdDoUsuario } from '../utils/getUserCity';
+import { getUserInfo } from '../utils/getUserInfo'; // 🚨 Atualizado para pegar role e cidadeId
+import api from '../services/api'; // 🚨 Usando o api.js centralizado para consistência
 import {
   Calendar, Clock, MapPin, FileText, Tag, Link as LinkIcon,
   UploadCloud, X, Loader2, CheckCircle2, Repeat, Star,
@@ -42,25 +43,22 @@ const TIPOS_LOCAL = [
   { id: 'servicos', label: 'Serviços Essenciais' }
 ];
 
-// Monta ISO com offset de Brasília (evita bug de fuso no servidor UTC)
 const montarISO = (data, hora) => {
   if (!data) return '';
   return `${data}T${hora || '00:00'}:00-03:00`;
 };
 
-// Extrai data/hora de um ISO existente para preencher os inputs
 const extrairDataHora = (iso) => {
   if (!iso) return { data: '', hora: '' };
   const m = String(iso).match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
   return m ? { data: m[1], hora: m[2] } : { data: '', hora: '' };
 };
 
-const API_BASE = import.meta.env.PROD
-  ? 'https://turismo-api-vv62.onrender.com/api'
-  : 'http://localhost:3000/api';
-
 export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }) {
   const editando = Boolean(eventoInicial?.id);
+  
+  // 🚨 NOVO: Extrair role e cidadeId do token
+  const { role: userRole, cidadeId: userCidadeId } = getUserInfo();
 
   const inicioInicial = extrairDataHora(eventoInicial?.dataInicio);
   const fimInicial = extrairDataHora(eventoInicial?.dataFim);
@@ -109,13 +107,17 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState('');
 
+  // 🚨 NOVO: Estados para seleção de cidade (apenas para super_admin)
+  const [cidadesDisponiveis, setCidadesDisponiveis] = useState([]);
+  const [cidadeSelecionada, setCidadeSelecionada] = useState(userCidadeId || '');
+
   // Carrega todos os locais cadastrados para o seletor de vínculo
   useEffect(() => {
     async function carregarLocais() {
       setCarregandoLocais(true);
       try {
         const resultados = await Promise.allSettled(
-          TIPOS_LOCAL.map(t => fetch(`${API_BASE}/${t.id}`).then(r => r.json()))
+          TIPOS_LOCAL.map(t => api.get(`/${t.id}`).then(res => res))
         );
         const lista = [];
         resultados.forEach((res, i) => {
@@ -146,6 +148,20 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
     }
     carregarLocais();
   }, []);
+
+  // 🚨 NOVO: Carregar cidades se for super_admin
+  useEffect(() => {
+    if (userRole === 'super_admin') {
+      api.get('/admin/cidades').then(res => {
+        setCidadesDisponiveis(res);
+        if (res.length > 0 && !cidadeSelecionada) {
+          setCidadeSelecionada(res[0].slug);
+        }
+      }).catch(() => {
+        setErro('Erro ao carregar lista de cidades.');
+      });
+    }
+  }, [userRole]);
 
   const handleChange = (e) => {
     setDados(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -210,9 +226,18 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
 
     try {
       const formData = new FormData();
-      const cidadeIdLimpo = String(getCidadeIdDoUsuario()).toLowerCase().trim();
-      formData.append('cidadeId', cidadeIdLimpo);
+      
+      // 🚨 CORREÇÃO: Definir o cidadeId correto uma única vez
+      const cidadeIdParaSalvar = userRole === 'super_admin' ? cidadeSelecionada : userCidadeId;
 
+      if (!cidadeIdParaSalvar) {
+        setErro('Erro: Nenhuma cidade foi identificada ou selecionada.');
+        setSalvando(false);
+        return;
+      }
+
+      // 🚨 CORREÇÃO CRÍTICA: Apenas UM append de cidadeId, normalizado
+      formData.append('cidadeId', String(cidadeIdParaSalvar).toLowerCase().trim());
 
       formData.append('titulo', dados.titulo);
       formData.append('descricao', dados.descricao);
@@ -243,26 +268,13 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
       formData.append('telefone', dados.telefone);
       formData.append('whatsapp', dados.whatsapp);
       formData.append('destaque', destaque);
-      formData.append('cidade', 'rolante');
+      // 🚨 REMOVIDO: formData.append('cidade', 'rolante'); (Legado e perigoso)
 
       imagensExistentes.forEach(url => formData.append('imagensExistentes', url));
       arquivosNovos.forEach(file => formData.append('imagens', file));
 
-      const token = localStorage.getItem('admin_token');
-      const url = editando ? `${API_BASE}/eventos/${eventoInicial.id}` : `${API_BASE}/eventos`;
-
-      const response = await fetch(url, {
-        method: editando ? 'PUT' : 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        const detalhes = Array.isArray(result.detalhes) ? result.detalhes.join(' | ') : '';
-        throw new Error(detalhes || result.error || 'Erro ao salvar evento');
-      }
+      const url = editando ? `/eventos/${eventoInicial.id}` : `/eventos`;
+      const response = await api.put(url, formData) || await api.post(url, formData); // Fallback seguro
 
       setSucesso(true);
 
@@ -285,9 +297,9 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
         setPreviewsNovos([]);
       }
 
-      if (onSucesso) setTimeout(() => onSucesso(result), 1200);
+      if (onSucesso) setTimeout(() => onSucesso(response), 1200);
     } catch (error) {
-      setErro(error.message);
+      setErro(error.message || 'Erro ao salvar evento');
     } finally {
       setSalvando(false);
     }
@@ -298,14 +310,13 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8 max-w-4xl mx-auto">
-
       <div className="border-b border-slate-100 pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-slate-800 tracking-tight">
             {editando ? 'Editar Evento' : 'Cadastrar Novo Evento'}
           </h2>
           <p className="text-slate-500 text-sm mt-0.5">
-            Calendário municipal de Rolante
+            Calendário municipal
           </p>
         </div>
         <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3.5 py-1.5 rounded-xl border border-emerald-100 text-xs font-semibold self-start sm:self-auto">
@@ -336,6 +347,31 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        
+        {/* 🚨 NOVO: Seletor de Cidade apenas para Super Admin */}
+        {userRole === 'super_admin' && (
+          <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 mb-4">
+            <label className="block text-xs font-bold uppercase tracking-wider text-amber-800 mb-2">
+              🌍 Criando como Super Admin: Selecione a Cidade de Destino *
+            </label>
+            <select
+              value={cidadeSelecionada}
+              onChange={(e) => setCidadeSelecionada(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white border border-amber-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+            >
+              <option value="">Selecione uma cidade...</option>
+              {cidadesDisponiveis.map(cidade => (
+                <option key={cidade.slug} value={cidade.slug}>
+                  {cidade.nome} ({cidade.estado})
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-amber-700 mt-1.5">
+              O evento ficará vinculado exclusivamente a esta cidade.
+            </p>
+          </div>
+        )}
 
         {/* Título */}
         <div>
@@ -392,52 +428,21 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Início *
-              </label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Início *</label>
               <div className="flex gap-2">
-                <input
-                  type="date"
-                  value={dataInicio}
-                  onChange={(e) => setDataInicio(e.target.value)}
-                  required
-                  className="flex-1 px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
-                />
-                <input
-                  type="time"
-                  value={horaInicio}
-                  onChange={(e) => setHoraInicio(e.target.value)}
-                  className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
-                />
+                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} required className="flex-1 px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600" />
+                <input type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600" />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Fim (opcional)
-              </label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Fim (opcional)</label>
               <div className="flex gap-2">
-                <input
-                  type="date"
-                  value={dataFim}
-                  onChange={(e) => setDataFim(e.target.value)}
-                  className="flex-1 px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
-                />
-                <input
-                  type="time"
-                  value={horaFim}
-                  onChange={(e) => setHoraFim(e.target.value)}
-                  disabled={!dataFim}
-                  className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 disabled:opacity-50"
-                />
+                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="flex-1 px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600" />
+                <input type="time" value={horaFim} onChange={(e) => setHoraFim(e.target.value)} disabled={!dataFim} className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600 disabled:opacity-50" />
               </div>
             </div>
           </div>
-
-          <p className="text-[11px] text-slate-400">
-            Para eventos de vários dias, preencha o fim. A diferença entre início e fim define a duração,
-            que será repetida em cada ocorrência nos eventos recorrentes.
-          </p>
         </div>
 
         {/* Recorrência */}
@@ -447,35 +452,18 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
             <h4 className="text-sm font-bold">Recorrência</h4>
           </div>
 
-          <select
-            value={recorrencia}
-            onChange={(e) => setRecorrencia(e.target.value)}
-            className={inputBase}
-          >
-            {RECORRENCIAS.map(r => (
-              <option key={r.id} value={r.id}>{r.label}</option>
-            ))}
+          <select value={recorrencia} onChange={(e) => setRecorrencia(e.target.value)} className={inputBase}>
+            {RECORRENCIAS.map(r => (<option key={r.id} value={r.id}>{r.label}</option>))}
           </select>
 
           {recorrencia === 'semanal' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-2">
-                Dias da semana *
-              </label>
+              <label className="block text-xs font-semibold text-slate-600 mb-2">Dias da semana *</label>
               <div className="flex flex-wrap gap-2">
                 {DIAS_SEMANA.map(dia => {
                   const ativo = diasSemana.includes(dia.id);
                   return (
-                    <button
-                      key={dia.id}
-                      type="button"
-                      onClick={() => toggleDia(dia.id)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                        ativo
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                          : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
-                      }`}
-                    >
+                    <button key={dia.id} type="button" onClick={() => toggleDia(dia.id)} className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${ativo ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'}`}>
                       {dia.label}
                     </button>
                   );
@@ -486,18 +474,8 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
 
           {recorrencia !== 'nenhuma' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Repetir até (opcional)
-              </label>
-              <input
-                type="date"
-                value={dataFimRecorrencia}
-                onChange={(e) => setDataFimRecorrencia(e.target.value)}
-                className="w-full md:w-auto px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Deixe vazio para repetir indefinidamente. Eventos recorrentes não desaparecem do app.
-              </p>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Repetir até (opcional)</label>
+              <input type="date" value={dataFimRecorrencia} onChange={(e) => setDataFimRecorrencia(e.target.value)} className="w-full md:w-auto px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-emerald-600" />
             </div>
           )}
         </div>
@@ -510,75 +488,34 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">
-              Vincular a um local já cadastrado
-            </label>
-            <select
-              value={localVinculado}
-              onChange={handleVincularLocal}
-              disabled={carregandoLocais}
-              className={inputBase}
-            >
-              <option value="">
-                {carregandoLocais ? 'Carregando locais...' : 'Não vincular (digitar manualmente)'}
-              </option>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Vincular a um local já cadastrado</label>
+            <select value={localVinculado} onChange={handleVincularLocal} disabled={carregandoLocais} className={inputBase}>
+              <option value="">{carregandoLocais ? 'Carregando locais...' : 'Não vincular (digitar manualmente)'}</option>
               {TIPOS_LOCAL.map(tipo => {
                 const doTipo = locaisDisponiveis.filter(l => l.tipo === tipo.id);
                 if (!doTipo.length) return null;
                 return (
                   <optgroup key={tipo.id} label={tipo.label}>
-                    {doTipo.map(l => (
-                      <option key={l.chave} value={l.chave}>{l.nome}</option>
-                    ))}
+                    {doTipo.map(l => (<option key={l.chave} value={l.chave}>{l.nome}</option>))}
                   </optgroup>
                 );
               })}
             </select>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Ao vincular, o endereço e as coordenadas acompanham o cadastro original automaticamente.
-            </p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">
-              Nome do local
-            </label>
-            <input
-              type="text"
-              name="local"
-              value={dados.local}
-              onChange={handleChange}
-              placeholder="Ex: Parque Municipal de Rolante"
-              className={inputBase}
-            />
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Nome do local</label>
+            <input type="text" name="local" value={dados.local} onChange={handleChange} placeholder="Ex: Parque Municipal" className={inputBase} />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">
-              Endereço
-            </label>
-            <input
-              type="text"
-              name="endereco"
-              value={dados.endereco}
-              onChange={handleChange}
-              placeholder="Ex: Av. Getúlio Vargas, 65 - Centro"
-              className={inputBase}
-            />
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Endereço</label>
+            <input type="text" name="endereco" value={dados.endereco} onChange={handleChange} className={inputBase} />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">
-              Coordenadas (para rota no mapa)
-            </label>
-            <input
-              type="text"
-              name="coordenadas"
-              value={dados.coordenadas}
-              onChange={handleChange}
-              placeholder="Ex: -29.6288, -50.4533"
-              className={`${inputBase} font-mono`}
-            />
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Coordenadas</label>
+            <input type="text" name="coordenadas" value={dados.coordenadas} onChange={handleChange} placeholder="Ex: -29.6288, -50.4533" className={`${inputBase} font-mono`} />
           </div>
         </div>
 
@@ -590,46 +527,23 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
               <h4 className="text-sm font-bold">Ingressos</h4>
             </div>
             <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-              <input
-                type="checkbox"
-                checked={gratuito}
-                onChange={(e) => setGratuito(e.target.checked)}
-                className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
-              />
-              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">
-                Gratuito
-              </span>
+              <input type="checkbox" checked={gratuito} onChange={(e) => setGratuito(e.target.checked)} className="w-4 h-4 accent-emerald-600 rounded cursor-pointer" />
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Gratuito</span>
             </label>
           </div>
 
           {!gratuito && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Valor / Observação
-              </label>
-              <input
-                type="text"
-                name="preco"
-                value={dados.preco}
-                onChange={handleChange}
-                placeholder="Ex: R$ 20,00 (meia-entrada R$ 10,00)"
-                className={inputBase}
-              />
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Valor / Observação</label>
+              <input type="text" name="preco" value={dados.preco} onChange={handleChange} placeholder="Ex: R$ 20,00" className={inputBase} />
             </div>
           )}
 
           <div>
             <label className={`${labelBase} flex items-center gap-1.5`}>
-              <LinkIcon size={14} className="text-slate-400" /> Link de Ingressos / Mais Informações
+              <LinkIcon size={14} className="text-slate-400" /> Link de Ingressos
             </label>
-            <input
-              type="url"
-              name="linkExterno"
-              value={dados.linkExterno}
-              onChange={handleChange}
-              placeholder="https://..."
-              className={inputBase}
-            />
+            <input type="url" name="linkExterno" value={dados.linkExterno} onChange={handleChange} placeholder="https://..." className={inputBase} />
           </div>
         </div>
 
@@ -639,47 +553,23 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
             <label className={`${labelBase} flex items-center gap-1.5`}>
               <MessageCircle size={14} className="text-slate-400" /> Telefone
             </label>
-            <input
-              type="text"
-              name="telefone"
-              value={dados.telefone}
-              onChange={handleChange}
-              placeholder="Ex: 5135471075"
-              className={inputBase}
-            />
+            <input type="text" name="telefone" value={dados.telefone} onChange={handleChange} className={inputBase} />
           </div>
           <div>
             <label className={`${labelBase} flex items-center gap-1.5`}>
               <MessageCircle size={14} className="text-emerald-600" /> WhatsApp
             </label>
-            <input
-              type="text"
-              name="whatsapp"
-              value={dados.whatsapp}
-              onChange={handleChange}
-              placeholder="Ex: 51999999999"
-              className={inputBase}
-            />
+            <input type="text" name="whatsapp" value={dados.whatsapp} onChange={handleChange} className={inputBase} />
           </div>
         </div>
 
         {/* Destaque */}
         <label className="flex items-center gap-3 cursor-pointer bg-amber-50 px-4 py-3 rounded-xl border border-amber-200">
-          <input
-            type="checkbox"
-            checked={destaque}
-            onChange={(e) => setDestaque(e.target.checked)}
-            className="w-5 h-5 accent-amber-600 rounded cursor-pointer"
-          />
+          <input type="checkbox" checked={destaque} onChange={(e) => setDestaque(e.target.checked)} className="w-5 h-5 accent-amber-600 rounded cursor-pointer" />
           <div className="flex items-center gap-2">
             <Star size={18} className="text-amber-600" />
             <div>
-              <span className="text-sm font-bold text-amber-800 block">
-                Destacar na tela inicial do app
-              </span>
-              <span className="text-[11px] text-amber-700">
-                Aparece no carrossel "Próximos Eventos" da home
-              </span>
+              <span className="text-sm font-bold text-amber-800 block">Destacar na tela inicial do app</span>
             </div>
           </div>
         </label>
@@ -695,11 +585,7 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
               {imagensExistentes.map((url, index) => (
                 <div key={`ext-${index}`} className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
                   <img src={url} alt={`Imagem ${index + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removerImagemExistente(index)}
-                    className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md cursor-pointer"
-                  >
+                  <button type="button" onClick={() => removerImagemExistente(index)} className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md cursor-pointer">
                     <X size={14} />
                   </button>
                 </div>
@@ -707,11 +593,7 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
               {previewsNovos.map((url, index) => (
                 <div key={`new-${index}`} className="relative aspect-square rounded-2xl overflow-hidden border border-emerald-300 bg-emerald-50">
                   <img src={url} alt={`Nova ${index + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removerNovaImagem(index)}
-                    className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md cursor-pointer"
-                  >
+                  <button type="button" onClick={() => removerNovaImagem(index)} className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-full shadow-md cursor-pointer">
                     <X size={14} />
                   </button>
                 </div>
@@ -720,23 +602,12 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
           )}
 
           <div className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-6 text-center bg-slate-50 hover:bg-emerald-50/30 transition-all cursor-pointer relative group">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={adicionarImagens}
-              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-            />
+            <input type="file" accept="image/*" multiple onChange={adicionarImagens} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" />
             <div className="flex flex-col items-center gap-2">
               <div className="bg-white p-3 rounded-2xl shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
                 <UploadCloud size={28} />
               </div>
-              <p className="text-sm font-semibold text-slate-700">
-                Clique ou arraste imagens aqui
-              </p>
-              <p className="text-xs text-slate-400">
-                PNG, JPG ou JPEG — o cartaz do evento funciona bem aqui
-              </p>
+              <p className="text-sm font-semibold text-slate-700">Clique ou arraste imagens aqui</p>
             </div>
           </div>
         </div>
@@ -744,27 +615,12 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
         {/* Ações */}
         <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
           {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-sm font-medium transition-all cursor-pointer"
-            >
+            <button type="button" onClick={onCancel} className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-sm font-medium transition-all cursor-pointer">
               Cancelar
             </button>
           )}
-          <button
-            type="submit"
-            disabled={salvando}
-            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-8 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
-          >
-            {salvando ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                <span>Salvando...</span>
-              </>
-            ) : (
-              <span>{editando ? 'Salvar Alterações' : 'Cadastrar Evento'}</span>
-            )}
+          <button type="submit" disabled={salvando} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-8 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70">
+            {salvando ? (<><Loader2 size={18} className="animate-spin" /><span>Salvando...</span></>) : (<span>{editando ? 'Salvar Alterações' : 'Cadastrar Evento'}</span>)}
           </button>
         </div>
       </form>
