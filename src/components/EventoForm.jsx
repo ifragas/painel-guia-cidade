@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getCidadeIdDoUsuario } from '../utils/getUserCity';
 import {
   Calendar, Clock, MapPin, FileText, Tag, Link as LinkIcon,
   UploadCloud, X, Loader2, CheckCircle2, Repeat, Star,
@@ -209,6 +210,10 @@ export default function EventoForm({ eventoInicial = null, onSucesso, onCancel }
 
     try {
       const formData = new FormData();
+      const cidadeIdLimpo = String(getCidadeIdDoUsuario()).toLowerCase().trim();
+      formData.append('cidadeId', cidadeIdLimpo);
+
+
       formData.append('titulo', dados.titulo);
       formData.append('descricao', dados.descricao);
       formData.append('categoria', dados.categoria);

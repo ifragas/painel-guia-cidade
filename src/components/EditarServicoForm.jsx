@@ -1,5 +1,6 @@
 // src/components/EditarServicoForm.jsx
 import { useState } from 'react';
+import { getCidadeIdDoUsuario } from '../utils/getUserCity';
 import { 
   UploadCloud, 
   Save, 
@@ -113,12 +114,16 @@ export default function EditarServicoForm({ item, tipo, onCancel, onSuccess }) {
     setArquivosNovos(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     setSalvando(true);
 
     try {
+      // 🚨 CORREÇÃO: Usar "dataForm" consistentemente para o FormData
       const dataForm = new FormData();
+      const cidadeIdLimpo = String(getCidadeIdDoUsuario()).toLowerCase().trim();
+      
+      dataForm.append('cidadeId', cidadeIdLimpo);
       dataForm.append('nome', formData.nome);
       dataForm.append('descricao', formData.descricao);
       dataForm.append('endereco', formData.endereco);
@@ -129,11 +134,7 @@ export default function EditarServicoForm({ item, tipo, onCancel, onSuccess }) {
       // Campos específicos de Serviço
       dataForm.append('tipoServico', tipoServico);
       dataForm.append('funcionamento24h', funcionamento24h);
-      
-      // WhatsApp como STRING (conforme schema da API)
       dataForm.append('whatsapp', whatsapp.trim());
-
-      // Redes Sociais
       dataForm.append('redesSociais', JSON.stringify(redesSociais));
 
       // Horários de Funcionamento
@@ -150,7 +151,7 @@ export default function EditarServicoForm({ item, tipo, onCancel, onSuccess }) {
       }
       dataForm.append('horarios', JSON.stringify(horariosPayload));
 
-      // Imagens existentes
+      // Imagens existentes (lê do estado "item")
       if (Array.isArray(item.imagens)) {
         item.imagens.forEach(url => {
           if (url) dataForm.append('imagensExistentes', url);
@@ -170,7 +171,7 @@ export default function EditarServicoForm({ item, tipo, onCancel, onSuccess }) {
         headers: {
           'Authorization': `Bearer ${token}`
         },
-        body: dataForm
+        body: dataForm // 🚨 Enviamos o dataForm
       });
 
       const result = await response.json();

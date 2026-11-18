@@ -1,7 +1,8 @@
+// src/components/Sidebar.jsx
 import React from 'react';
-import { MapPin, Utensils, Home, LogOut, Compass, HeartPulse, Calendar } from 'lucide-react';
+import { MapPin, Utensils, Home, LogOut, Compass, HeartPulse, Calendar, Building2, Users } from 'lucide-react';
 
-export default function Sidebar({ ativo, setAtivo, onLogout }) {
+export default function Sidebar({ ativo, setAtivo, onLogout, userRole }) {
   const menuItems = [
     { id: 'pontos-turisticos', label: 'Pontos Turísticos', icon: MapPin },
     { id: 'restaurantes', label: 'Restaurantes', icon: Utensils },
@@ -9,6 +10,14 @@ export default function Sidebar({ ativo, setAtivo, onLogout }) {
     { id: 'servicos', label: 'Serviços Essenciais', icon: HeartPulse },
     { id: 'eventos', label: 'Eventos', icon: Calendar },
   ];
+
+  // Itens exclusivos do Super Admin
+  const adminItems = userRole === 'super_admin' ? [
+    { id: 'admin-cidades', label: 'Gestão de Cidades', icon: Building2 },
+    { id: 'admin-usuarios', label: 'Gestão de Usuários', icon: Users }, // <-- ADICIONADO AQUI
+  ] : [];
+
+  const allItems = [...menuItems, ...adminItems];
 
   return (
     <aside className="group relative w-20 hover:w-64 bg-emerald-950 text-emerald-100 flex flex-col justify-between hidden md:flex border-r border-emerald-900/50 transition-all duration-300 ease-in-out z-30 shrink-0">
@@ -21,13 +30,13 @@ export default function Sidebar({ ativo, setAtivo, onLogout }) {
           </div>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
             <h1 className="font-bold text-white text-base tracking-wide">Guia da Cidade</h1>
-            <p className="text-xs text-emerald-300 font-medium">Turismo Rolante</p>
+            <p className="text-xs text-emerald-300 font-medium">Painel Admin</p>
           </div>
         </div>
 
         {/* Links de Navegação */}
         <nav className="p-3 space-y-2">
-          {menuItems.map((item) => {
+          {allItems.map((item) => {
             const Icon = item.icon;
             const isActive = ativo === item.id;
             return (
@@ -68,7 +77,6 @@ export default function Sidebar({ ativo, setAtivo, onLogout }) {
           </span>
         </button>
       </div>
-
     </aside>
   );
 }

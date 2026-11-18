@@ -1,3 +1,4 @@
+// src/components/Layout.jsx
 import React from 'react';
 import Sidebar from './Sidebar';
 
@@ -5,16 +6,24 @@ const TITULOS = {
   'pontos-turisticos': 'Pontos Turísticos',
   restaurantes: 'Restaurantes',
   acomodacoes: 'Acomodações',
-  servicos: 'Serviços Essenciais'
+  servicos: 'Serviços Essenciais',
+  'eventos': 'Eventos',
+  'admin-cidades': 'Cidades',
+  'admin-usuarios': 'Usuários'
 };
 
-export default function Layout({ ativo, setAtivo, onLogout, userEmail, children }) {
+export default function Layout({ ativo, setAtivo, onLogout, userEmail, children, userRole }) {
   const titulo = TITULOS[ativo] || ativo;
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* Sidebar Lateral */}
-      <Sidebar ativo={ativo} setAtivo={setAtivo} onLogout={onLogout} />
+      {/* Sidebar Lateral - 🚨 CORREÇÃO: Repassando userRole para o Sidebar */}
+      <Sidebar 
+        ativo={ativo} 
+        setAtivo={setAtivo} 
+        onLogout={onLogout} 
+        userRole={userRole} 
+      />
 
       {/* Conteúdo Principal */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -28,9 +37,15 @@ export default function Layout({ ativo, setAtivo, onLogout, userEmail, children 
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-slate-700 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200">
-              {userEmail || 'Administrador'}
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-medium text-slate-700 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200">
+                {userEmail || 'Administrador'}
+              </span>
+              {/* 🚨 DEBUG: Mostra a role atual no header para você validar */}
+              <span className="text-[10px] text-emerald-600 font-mono mt-1">
+                Role: {userRole || 'não definida'}
+              </span>
+            </div>
           </div>
         </header>
 

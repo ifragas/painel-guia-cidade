@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getCidadeIdDoUsuario } from '../utils/getUserCity';
 import { 
   UploadCloud, 
   Save, 
@@ -124,23 +125,27 @@ export default function EditarCardForm({ item, tipo, onCancel, onSuccess }) {
     setArquivosNovos(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
     e.preventDefault();
     setSalvando(true);
 
     try {
+      // 🚨 CORREÇÃO: Criamos o FormData e usamos o nome "dataForm" consistentemente
       const dataForm = new FormData();
+      const cidadeIdLimpo = String(getCidadeIdDoUsuario()).toLowerCase().trim();
+      
+      // Usamos dataForm.append, lendo os valores do estado "formData"
+      dataForm.append('cidadeId', cidadeIdLimpo);
       dataForm.append('nome', formData.nome || '');
       dataForm.append('descricao', formData.descricao || '');
       dataForm.append('endereco', formData.endereco || '');
       dataForm.append('coordenadas', formData.coordenadas || '');
       dataForm.append('linkExterno', formData.linkExterno || '');
-      dataForm.append('telefone', formData.telefone || ''); // ✅ ADICIONADO: Envio do telefone
+      dataForm.append('telefone', formData.telefone || '');
       dataForm.append('sempreAberto', sempreAberto);
       
       const whatsappFiltrado = whatsappList.map(w => w.trim()).filter(Boolean);
       dataForm.append('whatsapp', JSON.stringify(whatsappFiltrado));
-
       dataForm.append('redesSociais', JSON.stringify(redesSociais));
       
       const horariosPayload = {};
@@ -156,12 +161,14 @@ export default function EditarCardForm({ item, tipo, onCancel, onSuccess }) {
       }
       dataForm.append('horarios', JSON.stringify(horariosPayload));
 
+      // Imagens existentes (lê do estado formData)
       if (Array.isArray(formData.imagens)) {
         formData.imagens.forEach(url => {
           dataForm.append('imagensExistentes', url);
         });
       }
 
+      // Novas imagens
       arquivosNovos.forEach(file => {
         dataForm.append('imagens', file);
       });
@@ -172,7 +179,7 @@ export default function EditarCardForm({ item, tipo, onCancel, onSuccess }) {
         headers: {
           'Authorization': `Bearer ${token}`
         },
-        body: dataForm
+        body: dataForm // 🚨 Enviamos o dataForm, não o formData
       });
 
       const result = await response.json();
