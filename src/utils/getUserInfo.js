@@ -1,4 +1,3 @@
-// src/utils/getUserInfo.js
 export function getUserInfo() {
   const token = localStorage.getItem('admin_token');
   
@@ -17,8 +16,9 @@ export function getUserInfo() {
     const payload = JSON.parse(jsonPayload);
     
     return {
-      role: payload.role || 'city_admin',
-      cidadeId: payload.cidadeId || null // 🔒 SEM FALLBACK HARDCODED
+      // 🚨 LIMPEZA GARANTIDA: minúsculas e sem espaços
+      role: (payload.role || 'city_admin').toLowerCase().trim(),
+      cidadeId: payload.cidadeId ? String(payload.cidadeId).toLowerCase().trim() : null
     };
   } catch (error) {
     console.error('Erro ao decodificar token:', error);

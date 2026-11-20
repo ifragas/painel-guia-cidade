@@ -7,10 +7,10 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import api from '../services/api';
-import { useAuth } from '../context/AuthContext'; // 1. Importa o hook do contexto
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const { login } = useAuth(); // 2. Extrai a função login do contexto
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,9 +23,6 @@ export default function Login() {
 
     try {
       const data = await api.post('/login', { email, password });
-
-      // Opcional: o próprio context já pode gerenciar o localStorage se preferir, 
-      // mas mantendo assim, chamamos a função global do context:
       login(data.email, data.token);
     } catch (err) {
       setError(
@@ -38,17 +35,21 @@ export default function Login() {
   };
 
   const inputClasses =
-    'w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/20';
+    'w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20';
 
   const labelClasses =
     'mb-2 block text-xs font-bold uppercase tracking-wider text-slate-600';
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-emerald-600 px-4 py-8">
-      <div className="flex w-full max-w-md flex-col items-center rounded-3xl border border-slate-100 bg-white p-8 shadow-2xl sm:p-10">
+    // 🚨 ALTERAÇÃO 1: Fundo da tela com gradiente profundo e elegante
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-900 via-emerald-950 to-slate-950 px-4 py-8">
+      
+      {/* 🚨 ALTERAÇÃO 2: Sombra do card ajustada para combinar com o fundo escuro */}
+      <div className="flex w-full max-w-md flex-col items-center rounded-3xl border border-slate-100 bg-white p-8 shadow-2xl shadow-emerald-950/50 sm:p-10">
 
         {/* Logotipo */}
-        <div className="mb-5 flex items-center justify-center rounded-2xl bg-emerald-600 p-4 text-white shadow-lg shadow-emerald-600/25">
+        {/* 🚨 ALTERAÇÃO 3: Gradiente no fundo do ícone do logo */}
+        <div className="mb-5 flex items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 p-4 text-white shadow-lg shadow-emerald-900/40">
           <Compass size={32} strokeWidth={2} />
         </div>
 
@@ -133,10 +134,11 @@ export default function Login() {
           </div>
 
           {/* Botão de login */}
+          {/* 🚨 ALTERAÇÃO 4: Gradiente no botão de ação principal */}
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition duration-200 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition duration-200 hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
               <>

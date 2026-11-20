@@ -1,4 +1,3 @@
-// src/components/Sidebar.jsx
 import React from 'react';
 import { MapPin, Utensils, Home, LogOut, Compass, HeartPulse, Calendar, Building2, Users } from 'lucide-react';
 
@@ -11,21 +10,22 @@ export default function Sidebar({ ativo, setAtivo, onLogout, userRole }) {
     { id: 'eventos', label: 'Eventos', icon: Calendar },
   ];
 
-  // Itens exclusivos do Super Admin
   const adminItems = userRole === 'super_admin' ? [
     { id: 'admin-cidades', label: 'Gestão de Cidades', icon: Building2 },
-    { id: 'admin-usuarios', label: 'Gestão de Usuários', icon: Users }, // <-- ADICIONADO AQUI
+    { id: 'admin-usuarios', label: 'Gestão de Usuários', icon: Users },
   ] : [];
 
   const allItems = [...menuItems, ...adminItems];
 
   return (
-    <aside className="group relative w-20 hover:w-64 bg-emerald-950 text-emerald-100 flex flex-col justify-between hidden md:flex border-r border-emerald-900/50 transition-all duration-300 ease-in-out z-30 shrink-0">
+    // 🚨 ALTERAÇÃO: Gradiente profundo e elegante no fundo da sidebar
+    <aside className="group relative w-20 hover:w-64 bg-gradient-to-b from-emerald-900 via-emerald-950 to-slate-950 text-emerald-100 flex flex-col justify-between hidden md:flex border-r border-emerald-800/30 transition-all duration-300 ease-in-out z-30 shrink-0">
       
       {/* Topo / Logo */}
       <div>
-        <div className="p-5 flex items-center gap-3 border-b border-emerald-900/50 overflow-hidden">
-          <div className="bg-emerald-600 p-2.5 rounded-xl text-white shadow-lg shadow-emerald-900/40 shrink-0">
+        <div className="p-5 flex items-center gap-3 border-b border-emerald-800/30 overflow-hidden">
+          {/* 🚨 ALTERAÇÃO: Gradiente no ícone do logo para dar destaque */}
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-2.5 rounded-xl text-white shadow-lg shadow-emerald-900/50 shrink-0">
             <Compass size={22} />
           </div>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
@@ -46,8 +46,9 @@ export default function Sidebar({ ativo, setAtivo, onLogout, userRole }) {
                 title={item.label}
                 className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-medium text-sm transition-all cursor-pointer overflow-hidden ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50'
-                    : 'hover:bg-emerald-900/60 text-emerald-200/80 hover:text-white'
+                    // 🚨 ALTERAÇÃO: Gradiente suave no item ativo
+                    ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg shadow-emerald-900/50'
+                    : 'hover:bg-emerald-800/40 text-emerald-200/80 hover:text-white'
                 }`}
               >
                 <div className="shrink-0">
@@ -63,11 +64,11 @@ export default function Sidebar({ ativo, setAtivo, onLogout, userRole }) {
       </div>
 
       {/* Rodapé da Sidebar / Sair */}
-      <div className="p-3 border-t border-emerald-900/50">
+      <div className="p-3 border-t border-emerald-800/30">
         <button
           onClick={onLogout}
           title="Sair do Sistema"
-          className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-medium text-sm text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 transition-colors cursor-pointer overflow-hidden"
+          className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-medium text-sm text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-colors cursor-pointer overflow-hidden"
         >
           <div className="shrink-0">
             <LogOut size={20} />
